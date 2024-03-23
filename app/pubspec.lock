@@ -444,7 +444,7 @@ packages:
     source: hosted
     version: "1.8.3"
   pointycastle:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pointycastle
       sha256: "43ac87de6e10afabc85c445745a7b799e04de84cebaa4fd7bf55a5e1e9604d29"
