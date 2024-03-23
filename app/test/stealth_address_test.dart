@@ -130,5 +130,19 @@ void main() {
         publicKeyToAddress(privateKeyToPublic(stealthPrivateKey));
     print('bobRecoveredAddress: 0x${bytesToHex(bobRecoveredAddress)}');
     assert(bytesToHex(bobStealthAddress) == bytesToHex(bobRecoveredAddress));
+
+    var rng2 = Random(3232);
+    final r2 = generateNewPrivateKey(rng2);
+    final r2PubPoint = (params.G * r2)!;
+    final ephemeralPubKey2 =
+        Uint8List.view(r2PubPoint.getEncoded(false).buffer, 1);
+    print(
+        "Charles broadcast ephemeralPubKey: 0x${bytesToHex(ephemeralPubKey2)}");
+    final sharedSecret2 = (bob.vPubPoint() * r2)!.x!.toBigInteger()!;
+    final bobStealthPoint2 = (bob.kPubPoint() + (params.G * sharedSecret2)!)!;
+    final bobStealthPubKey2 =
+        Uint8List.view(bobStealthPoint2.getEncoded(false).buffer, 1);
+    final bobStealthAddress2 = publicKeyToAddress(bobStealthPubKey2);
+    print('bobStealthAddress: 0x${bytesToHex(bobStealthAddress2)}');
   });
 }
