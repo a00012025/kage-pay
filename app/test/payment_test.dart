@@ -1,3 +1,4 @@
+import 'package:app/features/common/constants.dart';
 import 'package:app/features/payment/application/payment_exception.dart';
 import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
@@ -101,7 +102,7 @@ main() {
   //   print(signedOp.signature);
   // });
   test('get nonce', () async {
-    final nonce = await paymentService.getNonce();
+    final nonce = await paymentService.getNonce(Constants.simpleAccount);
     print(nonce);
   });
   // test('send op', () async {

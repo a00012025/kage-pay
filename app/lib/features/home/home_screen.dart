@@ -1,3 +1,4 @@
+import 'package:app/features/collect_token/collect_token_screen.dart';
 import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/jumping_dot.dart';
@@ -9,6 +10,7 @@ import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/stealth_private_key.dart';
 import 'package:app/utils/string_utils.dart';
+import 'package:app/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,69 +61,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userData = ref.watch(userDataControllerProvider);
     final userUtxoAddress = ref.watch(userUtxoAddressProvider);
+    debugPrint('======={userUtxoAddress} : $userUtxoAddress=========');
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: AnimationLimiter(
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: <Widget>[
-              SliverAppBar(
-                pinned: true, // 固定AppBar在顶部
-                surfaceTintColor: Colors.transparent,
-                expandedHeight: 300.0,
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  title: Opacity(
-                    opacity: _opacity,
-                    child: AppBarSmall(userData: userData),
-                  ),
-                  background: Column(
-                    children: [
-                      Gaps.h32,
-                      TotalBalanceWidget(
-                        userData: userData,
-                      ),
-                      SendReceieveBtn(
-                        name: userData.name,
-                      ),
-                      Gaps.h32,
-                    ],
-                  ),
-                ),
-              ),
-              userUtxoAddress.when(
-                data: (value) {
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 375),
-                          child: SlideAnimation(
-                            verticalOffset: 150.0,
-                            child: TxHistoryItem(
-                              value: value[index],
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: value.length,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.read(userUtxoAddressProvider.notifier).updateState();
+            },
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: <Widget>[
+                SliverAppBar(
+                  pinned: true, // 固定AppBar在顶部
+                  surfaceTintColor: Colors.transparent,
+                  expandedHeight: 300.0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    title: Opacity(
+                      opacity: _opacity,
+                      child: AppBarSmall(userData: userData),
                     ),
-                  );
-                },
-                loading: () => const SliverToBoxAdapter(
-                  child: Center(
-                    child: CircularProgressIndicator(),
+                    background: Column(
+                      children: [
+                        Gaps.h32,
+                        userUtxoAddress.when(
+                          data: (value) {
+                            return TotalBalanceWidget(
+                              userData: userData,
+                            );
+                          },
+                          loading: () => const CircularProgressIndicator(),
+                          error: (error, _) => Text('Error: $error'),
+                        ),
+                        Gaps.h32,
+                        // AppTap(
+                        //   onTap: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => const SendTokenScreen(
+                        //             "dora",
+                        //             "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"),
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: const Text("test"),
+                        // ),
+                        SendReceieveBtn(
+                          name: userData.name,
+                        ),
+                        Gaps.h32,
+                      ],
+                    ),
                   ),
                 ),
-                error: (error, _) => SliverToBoxAdapter(
-                  child: Center(
-                    child: Text('Error: $error'),
+                userUtxoAddress.when(
+                  data: (value) {
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 150.0,
+                              child: TxHistoryItem(
+                                value: value[index],
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: value.length,
+                      ),
+                    );
+                  },
+                  loading: () => const SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  error: (error, _) => SliverToBoxAdapter(
+                    child: Center(
+                      child: Text('Error: $error'),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -147,6 +178,9 @@ class TxHistoryItem extends StatelessWidget {
             ClipboardData(
               text: value.address,
             ),
+          );
+          customToast(
+            'Copied to clipboard!',
           );
         },
         child: Container(
@@ -318,6 +352,29 @@ class SendReceieveBtn extends StatelessWidget {
             const Text("Send"),
           ],
         ),
+        Gaps.w24,
+        Column(
+          children: [
+            DefaultButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CollectTokenScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Image.asset(
+                  'assets/icons/send.png',
+                  width: 32,
+                ),
+              ),
+            ),
+            const Text("Collect"),
+          ],
+        ),
       ],
     );
   }
@@ -355,6 +412,9 @@ class QrcodeCard extends StatelessWidget {
                 ClipboardData(
                   text: StealthPrivateKey.alice.toEncodeStr(name),
                 ),
+              );
+              customToast(
+                'Copied to clipboard!',
               );
             },
             text: "Copy Data",
