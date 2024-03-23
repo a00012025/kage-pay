@@ -42,12 +42,18 @@ class PaymentService {
     return [];
   }
 
+  static Web3Client getWeb3Client() {
+    var httpClient = http.Client();
+    return Web3Client('https://eth-sepolia.public.blastapi.io', httpClient);
+  }
+
   String sendUserOperations(List<UserOperation> userOperations) {
     // Generate a new private key
     var rng = Random.secure();
     Credentials random = EthPrivateKey.createRandom(rng);
     var httpClient = http.Client();
-    var client = Web3Client('https://eth-sepolia.g.alchemy.com/v2/demo', httpClient);
+    var client =
+        Web3Client('https://eth-sepolia.g.alchemy.com/v2/demo', httpClient);
 
     return '';
   }

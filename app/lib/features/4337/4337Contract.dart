@@ -11,17 +11,21 @@ class Deployed4337Contract extends DeployedContract {
     );
   }
 
-  ContractEvent get transferEvent => event('transfer');
-  ContractEvent get approvalEvent => event('Approval');
-  ContractFunction get approve => function('approve');
-  ContractFunction get allowance => function('allowance');
-  ContractFunction get balanceOf => function('balanceOf');
-  ContractFunction get decimals => function('decimals');
-  ContractFunction get name => function('name');
-  ContractFunction get symbol => function('symbol');
-  ContractFunction get totalSupply => function('totalSupply');
-  ContractFunction get nonces => function('nonces');
-  ContractFunction get transfer => function('transfer');
+//
+//   ContractEvent get transferEvent => event('transfer');
+//   ContractEvent get approvalEvent => event('Approval');
+//   ContractFunction get approve => function('approve');
+//   ContractFunction get allowance => function('allowance');
+//   ContractFunction get balanceOf => function('balanceOf');
+//   ContractFunction get decimals => function('decimals');
+//   ContractFunction get name => function('name');
+//   ContractFunction get symbol => function('symbol');
+//   ContractFunction get totalSupply => function('totalSupply');
+//   ContractFunction get nonces => function('nonces');
+//   ContractFunction get transfer => function('transfer');
+  ContractFunction get getAddress => function('getAddress');
+  ContractFunction get accountImplementation =>
+      function('accountImplementation');
 }
 
 final abi4337 = [
