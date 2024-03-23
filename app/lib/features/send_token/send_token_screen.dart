@@ -129,7 +129,6 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
                       });
                   Navigator.pop(context);
                   Navigator.pop(context);
-                  await Future.delayed(const Duration(milliseconds: 500));
                 },
                 text: "Confirm",
               ),
@@ -141,30 +140,56 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
   }
 }
 
-class SuccessCard extends StatelessWidget {
+class SuccessCard extends StatefulWidget {
   const SuccessCard({
     super.key,
   });
 
   @override
+  State<SuccessCard> createState() => _SuccessCardState();
+}
+
+class _SuccessCardState extends State<SuccessCard> {
+  bool isSuccess = false;
+  @override
+  void initState() {
+    asyncInit();
+
+    super.initState();
+  }
+
+  void asyncInit() async {
+    await Future.delayed(const Duration(seconds: 3));
+    setState(() {
+      isSuccess = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Card(
         color: Colors.white,
+        surfaceTintColor: Colors.white,
         child: Padding(
-          padding: EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 48,
-              ),
+              isSuccess
+                  ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 48,
+                    )
+                  : Image.asset(
+                      'assets/icons/ninja_run.gif',
+                      width: 200,
+                    ),
               Gaps.h16,
               Text(
-                "🥷：Mission Complete!",
-                style: TextStyle(
+                isSuccess ? "🥷：Mission Complete!" : "🥷：We're working on it.",
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),

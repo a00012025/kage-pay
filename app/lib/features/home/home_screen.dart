@@ -1,6 +1,8 @@
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
 import 'package:app/features/send_token/scan_address_screen.dart';
+import 'package:app/features/send_token/send_token_screen.dart';
+import 'package:app/utils/app_tap.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/stealth_private_key.dart';
@@ -77,6 +79,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Gaps.h32,
                       TotalBalanceWidget(userData: userData),
                       Gaps.h32,
+                      AppTap(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SendTokenScreen(
+                                  "dora",
+                                  "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"),
+                            ),
+                          );
+                        },
+                        child: const Text("test"),
+                      ),
                       SendReceieveBtn(
                         name: userData.name,
                       ),
