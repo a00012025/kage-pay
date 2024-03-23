@@ -8,6 +8,7 @@ import 'package:app/features/common/contract/token_messenger_contract.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:web3dart/crypto.dart';
@@ -126,17 +127,32 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
 
           Gaps.h12,
           !isLoading
-              ? DefaultButton(
-                  onPressed: () {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    mumbaiUsdcToOpSepolia().then((_) async {
-                      await refreshBalance();
-                    }).catchError((error) {
-                      log(error.toString());
-                    });
-                  },
+              ? Column(
+                  children: [
+                    DefaultButton(
+                      onPressed: () {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        mumbaiUsdcToOpSepolia().then((_) async {
+                          await refreshBalance();
+                        }).catchError((error) {
+                          log(error.toString());
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Image.asset(
+                          'assets/icons/collect.png',
+                          width: 32,
+                        ),
+                      ),
+                    ),
+                    const Text("Collect")
+                  ],
+                )
+              : DefaultButton(
+                  onPressed: () {},
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Image.asset(
@@ -145,13 +161,18 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                     ),
                   ),
                 )
-              : const CircularProgressIndicator(),
+                  .animate(
+                      onPlay: (controller) => controller.repeat(reverse: false))
+                  .rotate(
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeInCubic,
+                  ),
           Gaps.h12,
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Colors.black87,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -174,6 +195,7 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -181,9 +203,9 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                 Text(
                   '${usdcOpSepoliaBalance.toString()} usdc',
                   style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
               ],
             ),
