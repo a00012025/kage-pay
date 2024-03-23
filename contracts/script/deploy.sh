@@ -18,6 +18,7 @@ declare -A contract_map=(
   ["erc-5564-announcer"]="Deploy5564AnnouncerScript"
   ["account-factory"]="DeployAccountFactoryScript"
   ["paymaster"]="DeployPaymasterScript"
+  ["usdc"]="DeployUSDCScript"
 )
 
 # Arrays to store specified chains and contracts
@@ -72,17 +73,34 @@ deploy() {
   rpc_url=${!rpc_url_name}
   api_key=${!api_key_name}
 
-  if [ -z "$rpc_url" ] || [ -z "$api_key" ]; then
-    echo "RPC URL or API Key for $chain_name is not set."
+  if [ -z "$rpc_url" ] ; then
+    echo "RPC URL for $chain_name is not set."
+    exit 1
+  fi
+
+  if [ -z "$api_key" ]; then
+    echo "Etherscan API Key for $chain_name is not set."
     exit 1
   fi
 
   echo "Deploying $contract_name to $chain_name..."
-  if [ "$dry_run" = true ]; then
-    echo "forge script $deploy_script --rpc-url \"$rpc_url\" --verify --etherscan-api-key \"$api_key\""
-  else
-    forge script $deploy_script --rpc-url "$rpc_url" --verify --etherscan-api-key "$api_key" --broadcast
+
+  # Start composing the command
+  cmd="forge script $deploy_script --rpc-url \"$rpc_url\""
+
+  if [ "$chain_name" != "zircuit" ]; then
+  cmd="$cmd --verify "
   fi
+
+  cmd="$cmd --etherscan-api-key \"$api_key\" --broadcast"
+
+  # Execute or echo the command based on dry run flag
+  if [ "$dry_run" = true ]; then
+    echo "$cmd"
+  else
+    eval "$cmd"
+  fi
+
   echo "Deployment to $chain_name completed."
 }
 

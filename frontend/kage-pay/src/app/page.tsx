@@ -9,20 +9,90 @@ import {
 import { useSearchParams } from "next/navigation";
 import { QrCode } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode.react";
 import { cn } from "@/app/_common/lib/utils";
 import { Toaster } from "sonner";
-import { useWatchContractEvent, useReadContract } from "wagmi";
-import { abi } from "../abi";
+import { useWatchContractEvent } from "wagmi";
+import { abi, abiGetAddress, abiUSDC } from "../abi";
 import { publicClient } from "../client";
+import { keccak256 } from "viem";
+import * as secp from "@noble/secp256k1";
 
 export default function Home() {
   const searchParams = useSearchParams();
+  const params = {
+    pk:
+      searchParams.get("pk") ??
+      "0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978",
+    pv:
+      searchParams.get("pv") ??
+      "0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7",
+    v:
+      searchParams.get("v") ??
+      "0x4b380bf4e5db9bb09053affcf64d5ba145281f6ab051ac569392ae38d8adf0ed",
+    name: searchParams.get("name") ?? "arron",
+  };
   const logContainerRef = useRef<HTMLDivElement>(null);
+  const flag = useRef(false);
+  const [addresses, setAddresses] = useState<string[]>([]);
+  const [balace, setBalace] = useState<string[]>([]);
+  const [triggerPulse, setTriggerPulse] = useState(false);
 
-  const logs = publicClient
-    .getLogs({
+  const getOwnerAddress = (eph: string) => {
+    const eph1 = BigInt("0x" + eph.slice(0, 64));
+    const eph2 = BigInt("0x" + eph.slice(64));
+
+    const pk1 = BigInt("0x" + params.pk.slice(2, 66));
+    const pk2 = BigInt("0x" + params.pk.slice(66));
+
+    const sharedSecret = secp.ProjectivePoint.fromAffine({
+      x: eph1,
+      y: eph2,
+    }).multiply(BigInt(params.v)).x;
+
+    const ownerPublicKey = secp.ProjectivePoint.fromAffine({
+      x: secp.CURVE.Gx,
+      y: secp.CURVE.Gy,
+    })
+      .multiply(sharedSecret)
+      .add(secp.ProjectivePoint.fromAffine({ x: pk1, y: pk2 }));
+
+    const ownerPublicAddress =
+      "0x" +
+      keccak256(
+        ("0x" + ownerPublicKey.toHex(false).substring(2)) as `0x${string}`
+      ).substring(26);
+
+    return ownerPublicAddress;
+  };
+
+  const getStealthAddress = async (ownerPublicAddress: string) => {
+    const paymasterTokenAddress = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+    const paymasterAddress = "0x49a92D66587909296b18eCa284b20cDAb58D72e9";
+    const salt = 0;
+
+    const data = await publicClient.readContract({
+      address: "0x388Dade543Dfc91e755f870403fE250F31e41583",
+      abi: abiGetAddress,
+      functionName: "getAddress",
+      args: [ownerPublicAddress, paymasterTokenAddress, paymasterAddress, salt],
+    });
+    return data;
+  };
+
+  const getBalance = async (address: string) => {
+    const data = await publicClient.readContract({
+      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      abi: abiUSDC,
+      functionName: "balanceOf",
+      args: [address],
+    });
+    return Number(data as BigInt) / 1e6;
+  };
+
+  const getLogs = async () => {
+    const logs = await publicClient.getLogs({
       address: "0x7356f4cC77168d0e6f94F1d8E28aeA1316852c0d",
       fromBlock: 5543541n,
       toBlock: "latest",
@@ -57,10 +127,32 @@ export default function Home() {
           },
         ],
       },
-    })
-    .then((logs) => {
-      console.log(logs);
     });
+
+    const ownerAddress = logs.map((log) =>
+      getOwnerAddress(log.args.ephemeralPubKey?.slice(2) as string)
+    );
+
+    const stealthAddresses = await Promise.all(
+      ownerAddress.map((ownerPublicAddress) =>
+        getStealthAddress(ownerPublicAddress)
+      )
+    );
+
+    const addressArr = new Set<string>();
+    logs.forEach((log) => {
+      if (stealthAddresses.includes(log.args.stealthAddress)) {
+        addressArr.add(log.args.stealthAddress);
+      }
+    });
+    setAddresses([...addressArr]);
+
+    Promise.all([...addressArr].map((address) => getBalance(address))).then(
+      (balanceArr) => {
+        setBalace(balanceArr);
+      }
+    );
+  };
 
   useWatchContractEvent({
     address: "0x7356f4cc77168d0e6f94f1d8e28aea1316852c0d",
@@ -68,67 +160,49 @@ export default function Home() {
     eventName: "Announcement",
     onLogs(logs) {
       console.log("New logs!", logs);
+      const index = addresses.indexOf(logs[0].args.stealthAddress);
+      if (index !== -1) {
+        getBalance(logs[0].args.stealthAddress)
+          .then((balance) => {
+            setBalace([
+              ...balace.slice(0, index),
+              balance,
+              ...balace.slice(index + 1),
+            ]);
+          })
+          .catch((error) => console.log(error));
+      } else {
+        getLogs();
+      }
     },
     chainId: 11155111,
   });
 
-  const params = {
-    pk:
-      searchParams.get("pk") ??
-      "0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978",
-    pv:
-      searchParams.get("pv") ??
-      "0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7",
-    v:
-      searchParams.get("v") ??
-      "0x4b380bf4e5db9bb09053affcf64d5ba145281f6ab051ac569392ae38d8adf0ed",
-    name: searchParams.get("name") ?? "arron",
-  };
+  useEffect(() => {
+    if (![...addresses].length) return;
+    setTriggerPulse(true);
+    setTimeout(() => {
+      setTriggerPulse(false);
+    }, 1000);
+  }, [addresses]);
 
-  const [addresses, setAddresses] = useState<string[]>([
-    "0x3Aa3F2947495d4c33845cF1B374f217E76F4CDE3",
-    "0x3Aa3F2947495d4c33845cF1B374f217E76F4CDE3",
-  ]);
-  const [addrMetadata, setAddrMetadata] = useState({
-    pk: "0x3Aa3F2947495d4c33845cF1B374f217E76F4CDE3",
-    pv: "0x3Aa3F2947495d4c33845cF1B374f217E76F4CDE3",
-  });
-  const [triggerPulse, setTriggerPulse] = useState(false);
-
-  const showMetadata = () => {
-    // qrcode
-  };
-
-  const updateLogs = (log: any) => {
-    setAddresses([...addresses, "0x3Aa3F2947495d4c33845cF1B374f217E76F4CDE8"]);
-    console.log(logContainerRef.current);
-    logContainerRef.current?.scrollTo(0, 0);
-  };
-
-  console.log(params);
+  useEffect(() => {
+    if (flag.current) return;
+    flag.current = true;
+    getLogs();
+  }, []);
 
   return (
     <main className="min-h-screen px-4">
       <div className="flex flex-col justify-center w-full mb-4">
         <OrganicCircle
-          amount="9987.243"
+          amount={balace.reduce((acc, curr) => acc + curr, 0).toFixed(3)}
           token="USDC"
           className={cn({ "animate-pulse": triggerPulse })}
         />
-        {/* <MainButton
-          className="mx-auto -mt-4"
-          icon={<QrCode size={24} />}
-          onClick={() => updateLogs("aa")}
-        >
-          add
-        </MainButton> */}
         <Dialog>
           <Dialog.Trigger asChild>
-            <MainButton
-              className="mx-auto -mt-4"
-              icon={<QrCode size={24} />}
-              onClick={showMetadata}
-            >
+            <MainButton className="mx-auto -mt-4" icon={<QrCode size={24} />}>
               Receiving
             </MainButton>
           </Dialog.Trigger>
@@ -141,6 +215,12 @@ export default function Home() {
                     pv: params.pv,
                     name: params.name,
                   })}
+                  imageSettings={{
+                    src: "/icons/ninja.png",
+                    height: 40,
+                    width: 40,
+                    excavate: false,
+                  }}
                   renderAs="canvas"
                   size={200}
                   bgColor="#475569"
@@ -157,7 +237,7 @@ export default function Home() {
         ref={logContainerRef}
       >
         <AnimatePresence>
-          {addresses.map((address, index) => (
+          {[...addresses].map((address, index) => (
             <motion.div
               key={index}
               initial={{ x: "-100%", opacity: 0 }}
@@ -165,7 +245,7 @@ export default function Home() {
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ListCard amount="9987.22" address={address} />
+              <ListCard address={address} amount={balace[index]} />
             </motion.div>
           ))}
         </AnimatePresence>
