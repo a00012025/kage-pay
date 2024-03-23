@@ -1,11 +1,16 @@
+import 'package:app/features/home/domain/userdata.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserDataController extends _$UserDataController {
+  void updateName(String name) {
+    state = UserData(name: name);
+  }
+
   @override
-  void build() {
-    return;
+  UserData build() {
+    return UserData(name: "");
   }
 }

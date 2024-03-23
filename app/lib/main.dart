@@ -1,11 +1,12 @@
+import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/home_screen.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,21 +22,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black87),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LoginScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _LoginScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final textEditingController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,29 +61,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
               ),
               Gaps.h32,
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                decoration: const InputDecoration(
                   hintText: "Your Name",
                 ),
+                onChanged: (value) => setState(() {}),
+                controller: textEditingController,
               ),
               const Spacer(),
               DefaultButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
-                          ),
-                        );
-                      },
-                      text: "Create Account")
-                  .animate()
-                  .fadeIn(
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeOut,
-                    delay: const Duration(milliseconds: 1500),
-                  )
-                  .shimmer(),
+                  isDisable: textEditingController.text.isEmpty,
+                  onPressed: () {
+                    if (textEditingController.text.isEmpty) {
+                      return;
+                    }
+                    ref
+                        .read(userDataControllerProvider.notifier)
+                        .updateName(textEditingController.text);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
+                    );
+                  },
+                  text: "Create Account")
             ],
           ),
         ),

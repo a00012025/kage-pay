@@ -1,6 +1,7 @@
 import 'package:app/utils/app_tap.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class DefaultButton extends StatelessWidget {
   const DefaultButton({
@@ -8,10 +9,12 @@ class DefaultButton extends StatelessWidget {
     required this.text,
     this.textStyle,
     super.key,
+    this.isDisable = false,
   });
   final VoidCallback onPressed;
   final String text;
   final TextStyle? textStyle;
+  final bool isDisable;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class DefaultButton extends StatelessWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: isDisable ? Colors.grey : Colors.black,
               borderRadius: BorderRadius.circular(Spacings.px12),
             ),
             child: Container(
@@ -34,7 +37,13 @@ class DefaultButton extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       )),
             ),
-          ),
+          )
+              .animate(
+                  onPlay: (controller) => controller.repeat(reverse: false))
+              .shimmer(
+                duration: const Duration(milliseconds: 1300),
+                delay: const Duration(milliseconds: 3000),
+              ),
           Positioned(
             top: 12,
             child: Padding(
