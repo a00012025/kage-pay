@@ -132,7 +132,7 @@ class UserOperation implements UserOperationBase {
         nonce: nonce ?? BigInt.zero,
         initCode: initCode ?? "0x",
         callData: callData,
-        callGasLimit: callGasLimit ?? BigInt.from(50000),
+        callGasLimit: callGasLimit ?? BigInt.from(150000),
         verificationGasLimit: verificationGasLimit ?? BigInt.from(500000),
         preVerificationGas: preVerificationGas ?? BigInt.from(500000),
         maxFeePerGas: maxFeePerGas ?? BigInt.from(1000000000),

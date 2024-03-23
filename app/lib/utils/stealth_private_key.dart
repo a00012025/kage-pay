@@ -99,4 +99,6 @@ class StealthPrivateKey {
     final y = BigInt.parse(bytesToHex(vPubBytes().sublist(32)), radix: 16);
     return ECCurve_secp256k1().curve.createPoint(x, y);
   }
+
+  
 }

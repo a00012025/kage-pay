@@ -1,3 +1,4 @@
+import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
@@ -127,7 +128,10 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
                   await showDialog(
                       context: context,
                       builder: (_) {
-                        return const SuccessCard();
+                        return SuccessCard(
+                          address: widget.addressAndEphemeralPubKey.$1,
+                          amount: textEditingController.text,
+                        );
                       });
                   Navigator.pop(context);
                   Navigator.pop(context);
@@ -145,7 +149,12 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
 class SuccessCard extends StatefulWidget {
   const SuccessCard({
     super.key,
+    required this.address,
+    required this.amount,
   });
+
+  final String address;
+  final String amount;
 
   @override
   State<SuccessCard> createState() => _SuccessCardState();
@@ -153,6 +162,7 @@ class SuccessCard extends StatefulWidget {
 
 class _SuccessCardState extends State<SuccessCard> {
   bool isSuccess = false;
+  String hash = '';
   @override
   void initState() {
     asyncInit();
@@ -161,7 +171,11 @@ class _SuccessCardState extends State<SuccessCard> {
   }
 
   void asyncInit() async {
-    await Future.delayed(const Duration(seconds: 3));
+    final service = PaymentService();
+    hash = await service.sendUserOperation(
+      widget.amount,
+      widget.address,
+    );
     setState(() {
       isSuccess = true;
     });
@@ -190,7 +204,9 @@ class _SuccessCardState extends State<SuccessCard> {
                     ),
               Gaps.h16,
               Text(
-                isSuccess ? "🥷：Mission Complete!" : "🥷：We're working on it.",
+                isSuccess
+                    ? "🥷：Mission Complete! ${hash}"
+                    : "🥷：We're working on it.",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

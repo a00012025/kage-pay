@@ -13,6 +13,7 @@ class EntryPointContract extends DeployedContract {
     );
   }
 
+  ContractFunction get getNonce => function('getNonce');
   ContractFunction get handleOps => function('handleOps');
 }
 

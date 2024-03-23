@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:app/features/common/constants.dart';
 import 'package:web3dart/web3dart.dart';
 
-class FactoryContract extends DeployedContract {
-  FactoryContract(super.abi, super.address);
-  static FactoryContract create() {
-    return FactoryContract(
+class SimpleAccountFactoryContract extends DeployedContract {
+  SimpleAccountFactoryContract(super.abi, super.address);
+  static SimpleAccountFactoryContract create() {
+    return SimpleAccountFactoryContract(
       ContractAbi.fromJson(jsonEncode(factoryContractAbi), 'factory_contract'),
       Constants.simpleAccountFactory,
     );

@@ -13,6 +13,7 @@ class SimpleAccountContract extends DeployedContract {
   }
 
   ContractFunction get execute => function('execute');
+  ContractFunction get executeBatch => function('executeBatch');
 }
 
 final simpleAccountContractAbi = [
