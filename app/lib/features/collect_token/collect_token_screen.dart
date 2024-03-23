@@ -141,32 +141,48 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                         });
                       },
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Image.asset(
-                          'assets/icons/collect.png',
-                          width: 32,
-                        ),
-                      ),
+                          padding: const EdgeInsets.all(12.0),
+                          child: Image.asset(
+                            'assets/icons/collect.png',
+                            width: 32,
+                          )),
                     ),
-                    const Text("Collect")
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.swap_vert_outlined),
+                        Text("Collect"),
+                      ],
+                    )
                   ],
                 )
-              : DefaultButton(
-                  onPressed: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Image.asset(
-                      'assets/icons/collect.png',
-                      width: 32,
+              : Column(
+                  children: [
+                    DefaultButton(
+                      onPressed: () {},
+                      child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Image.asset(
+                            'assets/icons/collect.png',
+                            width: 32,
+                          )
+                              .animate(
+                                  onPlay: (controller) =>
+                                      controller.repeat(reverse: true))
+                              .rotate(
+                                duration: const Duration(milliseconds: 2000),
+                                curve: Curves.easeInOutExpo,
+                              )
+                              .scale(
+                                duration: const Duration(milliseconds: 2000),
+                                begin: const Offset(0.2, 0.2),
+                                curve: Curves.easeInOutExpo,
+                              )),
                     ),
-                  ),
-                )
-                  .animate(
-                      onPlay: (controller) => controller.repeat(reverse: false))
-                  .rotate(
-                    duration: const Duration(milliseconds: 800),
-                    curve: Curves.easeInCubic,
-                  ),
+                    const Text("Loading")
+                  ],
+                ),
+
           Gaps.h12,
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 24),
