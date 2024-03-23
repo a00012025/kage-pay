@@ -60,7 +60,21 @@ class StealthPrivateKey {
     );
   }
 
-  static EthPrivateKey aliceAddressPrivateKey(int seed) {
+  static int getSeedFromAddress(String address) {
+    final addressList = {
+      1: "0x7a3afa306a0f095afef8ba7cc1a71f2ff20746c4",
+      2: "0xc957840ce4cbed0e6eacc5003b057d2c67b24c45",
+      3: "0xc7a1810f3cef51608ea47f5b0d5190495b0c4eb5"
+    };
+    for (var i = 1; i < 4; i++) {
+      if (addressList[i] == address) {
+        return i;
+      }
+    }
+    throw Exception("address not found");
+  }
+
+  static EthPrivateKey aliceStealthPrivateKey(int seed) {
     final alice = StealthPrivateKey.alice;
     final ECDomainParameters params = ECCurve_secp256k1();
 

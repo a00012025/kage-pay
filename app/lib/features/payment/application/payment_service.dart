@@ -87,8 +87,11 @@ class PaymentService {
           [approveCallData, sendCallData],
         ]);
 
-    final nonce = await getNonce(EthereumAddress.fromHex(mineAddress));
+    final seed = StealthPrivateKey.getSeedFromAddress(mineAddress);
+    final privateKey = StealthPrivateKey.aliceStealthPrivateKey(seed);
 
+    final nonce = await getNonce(privateKey.address);
+    debugPrint('=======nonce : $nonce=========');
     String? initCode;
 
     if (nonce == BigInt.zero) {

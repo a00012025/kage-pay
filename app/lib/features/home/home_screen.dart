@@ -161,12 +161,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class TxHistoryItem extends StatelessWidget {
-  const TxHistoryItem({
+  TxHistoryItem({
     super.key,
     required this.value,
   });
 
   final UtxoAddress value;
+
+  final emojis = [
+    '🥷',
+    '👨‍🚀',
+    '👨‍🚒',
+    '👨‍🎨',
+    '👨‍🎤',
+    '👨‍🏫',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +208,7 @@ class TxHistoryItem extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  '🥷',
+                  emojis[value.address.hashCode % emojis.length],
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontSize: 24,
                       ),
@@ -367,7 +376,7 @@ class SendReceieveBtn extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Image.asset(
-                  'assets/icons/send.png',
+                  'assets/icons/collect.png',
                   width: 32,
                 ),
               ),

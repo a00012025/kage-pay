@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:app/features/common/constants.dart';
-import 'package:app/features/common/contract/erc20_contract.dart';
+import 'package:app/features/common/contract/entry_point_contract.dart';
 import 'package:app/features/common/contract/simple_account_factory_contract.dart';
 import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
@@ -17,22 +17,37 @@ import 'package:web3dart/crypto.dart';
 
 void main() {
   test('get usdc balance', () async {
-    final erc20 = Erc20Contract.create();
+    final contract = EntryPointContract.create();
     for (var i = 1; i < 4; i++) {
       final client = PaymentService.getWeb3Client();
       final res = await client.call(
-        contract: erc20,
-        function: erc20.balanceOf,
+        contract: contract,
+        function: contract.getNonce,
         params: [
-          StealthPrivateKey.getAliceContractAddress(i),
+          StealthPrivateKey.aliceStealthPrivateKey(i).address,
+          BigInt.zero,
         ],
       );
       print(res);
     }
   });
+  // test('get usdc balance', () async {
+  //   final erc20 = Erc20Contract.create();
+  //   for (var i = 1; i < 4; i++) {
+  //     final client = PaymentService.getWeb3Client();
+  //     final res = await client.call(
+  //       contract: erc20,
+  //       function: erc20.balanceOf,
+  //       params: [
+  //         StealthPrivateKey.getAliceContractAddress(i),
+  //       ],
+  //     );
+  //     print(res);
+  //   }
+  // });
   test('alice stealth address', () async {
     for (var i = 1; i < 4; i++) {
-      final privateKey = StealthPrivateKey.aliceAddressPrivateKey(i);
+      final privateKey = StealthPrivateKey.aliceStealthPrivateKey(i);
 
       final simpleAccount = SimpleAccountFactoryContract.create();
 
