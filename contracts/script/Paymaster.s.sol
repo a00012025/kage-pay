@@ -53,7 +53,7 @@ contract DeployPaymasterScript is Script {
         });
         chainConfigs[chainIDs[Chain.PolygonMumbai]] = ChainConfig({
             tokenOracleAddress: 0x0715A7794a1dc8e42615F059dD6e406A6594651A,
-            tokenAddress: 0x9999f7fea5938fd3b1e26a12c3f2fb024e194f97,
+            tokenAddress: 0x9999f7Fea5938fD3b1E26A12c3f2fb024e194f97,
             nativeOracleAddress: 0x0
         });
     }
