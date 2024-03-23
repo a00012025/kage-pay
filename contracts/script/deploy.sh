@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # Load environment variables
 source .env
@@ -13,68 +13,89 @@ declare -A chain_map=(
   ["eth-sepolia"]="ETH_SEPOLIA"
 )
 
-# Flag to indicate dry run mode
+# Supported contracts and their deployment scripts
+declare -A contract_map=(
+  ["erc-5564-announcer"]="Deploy5564AnnouncerScript"
+  ["account-factory"]="DeployAccountFactoryScript"
+  ["paymaster"]="DeployPaymasterScript"
+)
+
+# Arrays to store specified chains and contracts
+declare -a specified_chains
+declare -a specified_contracts
+
+# Flag for dry run mode
 dry_run=false
 
-# Check for --dry-run argument and set flag
-for arg in "$@"; do
-  if [[ "$arg" == "--dry-run" ]]; then
-    dry_run=true
-    break
-  fi
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -chain=*)
+      chain_name="${1#*=}" # Extract everything after "="
+      if [[ -v chain_map[$chain_name] ]]; then
+        specified_chains+=("$chain_name")
+      else
+        echo "Invalid chain name: $chain_name"
+        exit 1
+      fi
+      ;;
+    -contract=*)
+      contract_name="${1#*=}" # Extract everything after "="
+      if [[ -v contract_map[$contract_name] ]]; then
+        specified_contracts+=("$contract_name")
+      else
+        echo "Invalid contract name: $contract_name"
+        exit 1
+      fi
+      ;;
+    --dry-run)
+      dry_run=true
+      ;;
+    *)
+      echo "Unknown or improperly formatted option: $1"
+      echo "Use -chain=CHAIN_NAME and -contract=CONTRACT_NAME format."
+      exit 1
+      ;;
+  esac
+  shift # Move to the next argument
 done
 
 deploy() {
-  chain_readable_name=$1
-  chain_env_prefix=${chain_map["$chain_readable_name"]}
+  chain_name=$1
+  contract_name=$2
+  chain_env_prefix=${chain_map["$chain_name"]}
+  deploy_script=${contract_map["$contract_name"]}
 
-  rpc_url_name="${chain_env_prefix}_RPC_URL" # Append _RPC_URL
-  api_key_name="${chain_env_prefix}_SCAN_API_KEY" # Append _API_KEY
+  rpc_url_name="${chain_env_prefix}_RPC_URL"
+  api_key_name="${chain_env_prefix}_SCAN_API_KEY"
 
   rpc_url=${!rpc_url_name}
   api_key=${!api_key_name}
 
   if [ -z "$rpc_url" ] || [ -z "$api_key" ]; then
-    echo "RPC URL or API Key for $chain_readable_name is not set."
+    echo "RPC URL or API Key for $chain_name is not set."
     exit 1
   fi
 
-  echo "Deploying to $chain_readable_name..."
-  echo ""
+  echo "Deploying $contract_name to $chain_name..."
   if [ "$dry_run" = true ]; then
-    echo "forge script DeployScript --rpc-url \"$rpc_url\" --verify --etherscan-api-key \"$api_key\""
+    echo "forge script $deploy_script --rpc-url \"$rpc_url\" --verify --etherscan-api-key \"$api_key\""
   else
-    forge script DeployScript --rpc-url "$rpc_url" --verify --etherscan-api-key "$api_key" --broadcast
+    forge script $deploy_script --rpc-url "$rpc_url" --verify --etherscan-api-key "$api_key" --broadcast
   fi
-  echo ""
-  echo "Deployment to $chain_readable_name completed."
+  echo "Deployment to $chain_name completed."
 }
 
-# Check if no arguments
-if [ $# -eq 0 ]; then
-  echo "No chain specified."
+# Validate input
+if [ ${#specified_chains[@]} -eq 0 ] || [ ${#specified_contracts[@]} -eq 0 ]; then
+  echo "Please specify at least one chain and one contract. Example usage:"
+  echo "  $0 -chain=arbitrum-sepolia -contract=erc-5564-announcer --dry-run"
   exit 1
 fi
 
-# Function to join array elements
-join_by() {
-  local IFS="$1"
-  shift
-  echo "$*"
-}
-
-# Deploy to specified chain(s)
-for arg in "$@"; do
-  if [[ "$arg" == "--dry-run" ]]; then
-    continue # Skip the --dry-run argument
-  elif [[ -v chain_map["$arg"] ]]; then
-    deploy "$arg"
-  elif [[ "$arg" == "all" ]]; then
-    for chain_name in "${!chain_map[@]}"; do
-      deploy "$chain_name"
-    done
-  else
-    echo "Unsupported chain: $arg. Supported chains are: $(join_by ', ' "${!chain_map[@]}")"
-    exit 1
-  fi
+# Deploy to specified chains and contracts
+for chain in "${specified_chains[@]}"; do
+  for contract in "${specified_contracts[@]}"; do
+    deploy "$chain" "$contract"
+  done
 done

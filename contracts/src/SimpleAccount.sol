@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@aa/contracts/core/BaseAccount.sol";
 import "@aa/contracts/core/Helpers.sol";
-import "./TokenCallbackHandler.sol";
+import "./utils/TokenCallbackHandler.sol";
 
 /**
  * minimal account.
