@@ -1,3 +1,4 @@
+import 'package:app/features/stealth/stealth_service.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/string_utils.dart';
@@ -5,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SendTokenScreen extends ConsumerStatefulWidget {
-  const SendTokenScreen(this.name, this.address, {super.key});
+  const SendTokenScreen(this.name, this.addressAndEphemeralPubKey, {super.key});
   final String name;
-  final String address;
+  final StealthAddressAndEphemeralPubKey addressAndEphemeralPubKey;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -53,7 +54,8 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
                         ),
                       ),
                       Gaps.w8,
-                      Text("TO：${widget.address.toFormattedAddress()}",
+                      Text(
+                          "TO：${widget.addressAndEphemeralPubKey.$1.toFormattedAddress()}",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

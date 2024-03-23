@@ -59,7 +59,7 @@ class _SendTokenChooseAddressState extends ConsumerState<ScanAddressScreen> {
             MaterialPageRoute(
               builder: (context) => SendTokenScreen(
                 name,
-                result.$1,
+                result,
               ),
             ),
           );

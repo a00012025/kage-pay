@@ -5,7 +5,10 @@ import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
 
-typedef StealthAddress = (String address, Uint8List ephemeralPubKey);
+typedef StealthAddressAndEphemeralPubKey = (
+  String address,
+  Uint8List ephemeralPubKey
+);
 
 class StealthService {
   final rng = Random.secure();
@@ -18,7 +21,8 @@ class StealthService {
     return ECCurve_secp256k1().curve.createPoint(x, y);
   }
 
-  StealthAddress getOthersAddress(ECPoint vPubPoint, ECPoint kPubPoint) {
+  StealthAddressAndEphemeralPubKey getOthersAddress(
+      ECPoint vPubPoint, ECPoint kPubPoint) {
     final r = generateNewPrivateKey(rng);
     final rPubPoint = (params.G * r)!;
     final shared1 = (vPubPoint * r)!;
