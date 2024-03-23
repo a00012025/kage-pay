@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {Script, console} from "forge-std/Script.sol";
 import "../src/SimpleAccountFactory.sol";
 
-contract DeployScript is Script {
+contract DeployAccountFactoryScript is Script {
     function setUp() public {}
 
     function run() public {

@@ -27,9 +27,16 @@ contract SimpleAccountFactory {
      */
     function createAccount(
         address owner,
+        address paymasterTokenAddress,
+        address paymaster,
         uint256 salt
     ) public returns (SimpleAccount ret) {
-        address addr = getAddress(owner, salt);
+        address addr = getAddress(
+            owner,
+            paymasterTokenAddress,
+            paymaster,
+            salt
+        );
         uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
             return SimpleAccount(payable(addr));
@@ -38,7 +45,10 @@ contract SimpleAccountFactory {
             payable(
                 new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
-                    abi.encodeCall(SimpleAccount.initialize, (owner))
+                    abi.encodeCall(
+                        SimpleAccount.initialize,
+                        (owner, paymasterTokenAddress, paymaster)
+                    )
                 )
             )
         );
@@ -49,6 +59,8 @@ contract SimpleAccountFactory {
      */
     function getAddress(
         address owner,
+        address paymasterTokenAddress,
+        address paymaster,
         uint256 salt
     ) public view returns (address) {
         return
@@ -59,7 +71,10 @@ contract SimpleAccountFactory {
                         type(ERC1967Proxy).creationCode,
                         abi.encode(
                             address(accountImplementation),
-                            abi.encodeCall(SimpleAccount.initialize, (owner))
+                            abi.encodeCall(
+                                SimpleAccount.initialize,
+                                (owner, paymasterTokenAddress, paymaster)
+                            )
                         )
                     )
                 )

@@ -40,6 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               Gaps.h32,
               TextField(
+                textAlign: TextAlign.center,
                 decoration: const InputDecoration(
                   hintText: "Your Name",
                 ),

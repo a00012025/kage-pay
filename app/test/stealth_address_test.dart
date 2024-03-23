@@ -3,20 +3,36 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:app/features/stealth/stealth_service.dart';
+import 'package:app/utils/stealth_private_key.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
 
 void main() {
+  test('stealth service', () {
+    final service = StealthService();
+
+    final vPubPoint = service.getECPoint(
+        '0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7');
+    final kPubPoint = service.getECPoint(
+        '0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978');
+    final result = service.getOthersAddress(vPubPoint, kPubPoint);
+    debugPrint('=======result : $result=========');
+  });
   test('Stealth address', () async {
     final ECDomainParameters params = ECCurve_secp256k1();
     var rng = Random(123777);
 
     final alice = StealthPrivateKey.random(rng);
+    print(alice.k);
+    print(alice.v);
     final bob = StealthPrivateKey.random(rng);
     print('alice: ${alice.kHex()}, ${alice.vHex()}');
-    print('bob: ${bob.kHex()}, ${bob.vHex()}');
+    print('bob k and v: ${bob.kHex()}, ${bob.vHex()}');
+    print('bob K and V: ${bob.kPubHex()}, ${bob.vPubHex()}');
 
     // alice sending token to bob, generating shared secret
     final r = generateNewPrivateKey(rng);
@@ -54,75 +70,4 @@ void main() {
     print('bobRecoveredAddress: 0x${bytesToHex(bobRecoveredAddress)}');
     assert(bytesToHex(bobStealthAddress) == bytesToHex(bobRecoveredAddress));
   });
-}
-
-class StealthPrivateKey {
-  final BigInt k;
-  final BigInt v;
-
-  StealthPrivateKey(this.k, this.v);
-
-  // new random
-  StealthPrivateKey.random(Random rng)
-      : k = generateNewPrivateKey(rng),
-        v = generateNewPrivateKey(rng);
-
-  @override
-  String toString() {
-    final kHex = bytesToHex(intToBytes(k));
-    final vHex = bytesToHex(intToBytes(v));
-    return 'StealthPrivateKey{k: $kHex, v: $vHex}';
-  }
-
-  String kHex() {
-    return bytesToHex(intToBytes(k));
-  }
-
-  String vHex() {
-    return bytesToHex(intToBytes(v));
-  }
-
-  Uint8List kBytes() {
-    return intToBytes(k);
-  }
-
-  Uint8List vBytes() {
-    return intToBytes(v);
-  }
-
-  BigInt kPub() {
-    return bytesToUnsignedInt(privateKeyToPublic(k));
-  }
-
-  String kPubHex() {
-    return bytesToHex(intToBytes(kPub()));
-  }
-
-  Uint8List kPubBytes() {
-    return privateKeyToPublic(k);
-  }
-
-  ECPoint kPubPoint() {
-    final x = BigInt.parse(bytesToHex(kPubBytes().sublist(0, 32)), radix: 16);
-    final y = BigInt.parse(bytesToHex(kPubBytes().sublist(32)), radix: 16);
-    return ECCurve_secp256k1().curve.createPoint(x, y);
-  }
-
-  BigInt vPub() {
-    return bytesToUnsignedInt(privateKeyToPublic(v));
-  }
-
-  String vPubHex() {
-    return bytesToHex(intToBytes(vPub()));
-  }
-
-  Uint8List vPubBytes() {
-    return privateKeyToPublic(v);
-  }
-
-  ECPoint vPubPoint() {
-    final x = BigInt.parse(bytesToHex(vPubBytes().sublist(0, 32)), radix: 16);
-    final y = BigInt.parse(bytesToHex(vPubBytes().sublist(32)), radix: 16);
-    return ECCurve_secp256k1().curve.createPoint(x, y);
-  }
 }

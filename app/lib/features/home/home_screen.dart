@@ -1,9 +1,12 @@
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
+import 'package:app/features/send_token/scan_address_screen.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
+import 'package:app/utils/stealth_private_key.dart';
 import 'package:app/utils/string_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -74,7 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Gaps.h32,
                       TotalBalanceWidget(userData: userData),
                       Gaps.h32,
-                      const SendReceieveBtn(),
+                      SendReceieveBtn(
+                        name: userData.name,
+                      ),
                       Gaps.h32,
                     ],
                   ),
@@ -224,7 +229,10 @@ class AppBarSmall extends StatelessWidget {
 class SendReceieveBtn extends StatelessWidget {
   const SendReceieveBtn({
     super.key,
+    required this.name,
   });
+
+  final String name;
 
   @override
   Widget build(BuildContext context) {
@@ -238,7 +246,9 @@ class SendReceieveBtn extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (context) {
-                    return const QrcodeCard();
+                    return QrcodeCard(
+                      name: name,
+                    );
                   },
                 );
               },
@@ -257,7 +267,14 @@ class SendReceieveBtn extends StatelessWidget {
         Column(
           children: [
             DefaultButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScanAddressScreen(),
+                  ),
+                );
+              },
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Image.asset(
@@ -277,7 +294,10 @@ class SendReceieveBtn extends StatelessWidget {
 class QrcodeCard extends StatelessWidget {
   const QrcodeCard({
     super.key,
+    required this.name,
   });
+
+  final String name;
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +308,7 @@ class QrcodeCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: PrettyQrView.data(
-              data: 'lorem ipsum dolor sit amet',
+              data: StealthPrivateKey.alice().toEncodeStr(name),
               decoration: const PrettyQrDecoration(
                 image: PrettyQrDecorationImage(
                   image: AssetImage('assets/icons/USDC.png'),
@@ -298,7 +318,13 @@ class QrcodeCard extends StatelessWidget {
           ),
           Gaps.h24,
           DefaultButton(
-            onPressed: () {},
+            onPressed: () {
+              Clipboard.setData(
+                ClipboardData(
+                  text: StealthPrivateKey.alice().toEncodeStr(name),
+                ),
+              );
+            },
             text: "Copy Data",
             showIcon: true,
           ),
