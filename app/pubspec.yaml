@@ -42,6 +42,7 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
   pointycastle: ^3.7.4
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
