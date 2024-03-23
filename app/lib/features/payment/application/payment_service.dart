@@ -157,7 +157,7 @@ class PaymentService {
       contract: entryPointContract,
       function: entryPointContract.handleOps,
       parameters: [
-        ops.map((e) => e.toList()),
+        ops.map((e) => e.toList()).toList(),
         Constants.myAddress,
       ],
       maxGas: 1000000,

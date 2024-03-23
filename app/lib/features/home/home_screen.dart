@@ -1,6 +1,9 @@
+import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
+import 'package:app/features/payment/domain/utxo_address.dart';
 import 'package:app/features/send_token/scan_address_screen.dart';
+import 'package:app/utils/app_tap.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/stealth_private_key.dart';
@@ -54,6 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userData = ref.watch(userDataControllerProvider);
+    final userUtxoAddress = ref.watch(userUtxoAddressProvider);
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -65,7 +69,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 pinned: true, // 固定AppBar在顶部
                 surfaceTintColor: Colors.transparent,
                 expandedHeight: 300.0,
-
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
                   title: Opacity(
@@ -75,7 +78,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   background: Column(
                     children: [
                       Gaps.h32,
-                      TotalBalanceWidget(userData: userData),
+                      userUtxoAddress.when(
+                        data: (value) {
+                          return TotalBalanceWidget(
+                            userData: userData,
+                            totalBalance: getBalance(value),
+                          );
+                        },
+                        loading: () => const CircularProgressIndicator(),
+                        error: (error, _) => Text('Error: $error'),
+                      ),
                       Gaps.h32,
                       // AppTap(
                       //   onTap: () {
@@ -98,19 +110,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 375),
-                      child: const SlideAnimation(
-                        verticalOffset: 150.0,
-                        child: TxHistoryItem(),
-                      ),
-                    );
-                  },
-                  childCount: 100,
+              userUtxoAddress.when(
+                data: (value) {
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return AnimationConfiguration.staggeredList(
+                          position: index,
+                          duration: const Duration(milliseconds: 375),
+                          child: SlideAnimation(
+                            verticalOffset: 150.0,
+                            child: TxHistoryItem(
+                              value: value[index],
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: value.length,
+                    ),
+                  );
+                },
+                loading: () => const SliverToBoxAdapter(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (error, _) => SliverToBoxAdapter(
+                  child: Center(
+                    child: Text('Error: $error'),
+                  ),
                 ),
               ),
             ],
@@ -124,73 +152,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class TxHistoryItem extends StatelessWidget {
   const TxHistoryItem({
     super.key,
+    required this.value,
   });
+
+  final UtxoAddress value;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '🥷',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontSize: 24,
-                    ),
-              ),
+      child: AppTap(
+        onTap: () {
+          Clipboard.setData(
+            ClipboardData(
+              text: value.address,
             ),
-            Gaps.w16,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Receieved",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
                 ),
-                Text(
-                  "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"
-                      .toFormattedAddress(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  '🥷',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: 24,
+                      ),
                 ),
-              ],
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              ),
+              Gaps.w16,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "+1000",
-                    textAlign: TextAlign.end,
+                    "Receieved",
                     style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    value.address.toFormattedAddress(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Gaps.w4,
-                  Image.asset('assets/icons/USDC.png', width: 24),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "${value.balance / BigInt.from(10).pow(6)}",
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Gaps.w4,
+                    Image.asset('assets/icons/USDC.png', width: 24),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -351,9 +390,11 @@ class TotalBalanceWidget extends StatelessWidget {
   const TotalBalanceWidget({
     super.key,
     required this.userData,
+    required this.totalBalance,
   });
 
   final UserData userData;
+  final String totalBalance;
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +419,7 @@ class TotalBalanceWidget extends StatelessWidget {
             //richText with decimal
             RichText(
               text: TextSpan(
-                text: userData.totalBalance.split('.')[0],
+                text: totalBalance.split('.')[0],
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.black,
                       fontSize: 48,
@@ -386,8 +427,8 @@ class TotalBalanceWidget extends StatelessWidget {
                     ),
                 children: [
                   TextSpan(
-                    text: userData.totalBalance.split('.').length > 1
-                        ? '.${userData.totalBalance.split('.')[1]}'
+                    text: totalBalance.split('.').length > 1
+                        ? '.${totalBalance.split('.')[1]}'
                         : '.00',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
