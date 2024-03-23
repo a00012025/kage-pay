@@ -47,7 +47,7 @@ class PaymentService {
     var rng = Random.secure();
     Credentials random = EthPrivateKey.createRandom(rng);
     var httpClient = http.Client();
-    var client = Web3Client('https://1rpc.io/sepolia', httpClient);
+    var client = Web3Client('https://eth-sepolia.g.alchemy.com/v2/demo', httpClient);
 
     return '';
   }
