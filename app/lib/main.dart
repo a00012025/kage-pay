@@ -1,3 +1,4 @@
+import 'package:app/features/home/home_screen.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:flutter/material.dart';
@@ -66,13 +67,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const Spacer(),
-              DefaultButton(onPressed: () {}, text: "Create Account")
+              DefaultButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        );
+                      },
+                      text: "Create Account")
                   .animate()
                   .fadeIn(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeOut,
                     delay: const Duration(milliseconds: 1500),
-                  ),
+                  )
+                  .shimmer(),
             ],
           ),
         ),

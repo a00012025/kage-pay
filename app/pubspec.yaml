@@ -38,6 +38,9 @@ dependencies:
   flutter_riverpod:
   riverpod_annotation:
   flutter_animate: ^4.5.0
+  freezed: ^2.4.7
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,6 +49,7 @@ dev_dependencies:
     # a tool for running code generators
   build_runner:
   # the code generator
+  json_serializable:
   riverpod_generator:
 
 # For information on the generic Dart part of this file, see the
