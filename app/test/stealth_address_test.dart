@@ -31,7 +31,8 @@ void main() {
     print(alice.v);
     final bob = StealthPrivateKey.random(rng);
     print('alice: ${alice.kHex()}, ${alice.vHex()}');
-    print('bob: ${bob.kHex()}, ${bob.vHex()}');
+    print('bob k and v: ${bob.kHex()}, ${bob.vHex()}');
+    print('bob K and V: ${bob.kPubHex()}, ${bob.vPubHex()}');
 
     // alice sending token to bob, generating shared secret
     final r = generateNewPrivateKey(rng);
