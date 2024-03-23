@@ -1,4 +1,5 @@
 import 'package:app/features/home/controllers/user_addresses_controller.dart';
+import 'package:app/features/collect_token/collect_token_screen.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
@@ -336,6 +337,29 @@ class SendReceieveBtn extends StatelessWidget {
               ),
             ),
             const Text("Send"),
+          ],
+        ),
+        Gaps.w24,
+        Column(
+          children: [
+            DefaultButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CollectTokenScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Image.asset(
+                  'assets/icons/send.png',
+                  width: 32,
+                ),
+              ),
+            ),
+            const Text("Collect"),
           ],
         ),
       ],
