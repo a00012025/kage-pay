@@ -25,7 +25,7 @@ class Constants {
     "0x7356f4cC77168d0e6f94F1d8E28aeA1316852c0d",
   );
 
-  static EthereumAddress myAddress = EthereumAddress.fromHex(
+  static EthereumAddress relaterAddress = EthereumAddress.fromHex(
     "0xc96Cd4B2499E66698fCa30BaB7e0620A7D919807",
   );
   static EthereumAddress payMaster = EthereumAddress.fromHex(
