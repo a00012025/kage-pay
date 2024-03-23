@@ -5,6 +5,9 @@ import 'dart:typed_data';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
+import 'package:web3dart/web3dart.dart';
+
+typedef AddressPirvateKey = (String address, String privateKey);
 
 class StealthPrivateKey {
   final BigInt k;
@@ -12,13 +15,51 @@ class StealthPrivateKey {
 
   StealthPrivateKey(this.k, this.v);
 
-  static StealthPrivateKey alice() {
+  static StealthPrivateKey get alice {
     return StealthPrivateKey(
       BigInt.parse(
           "61930824511912595429206811402568183081408216245750760436263091246199513413718"),
       BigInt.parse(
           "73962569226937429975353181806669569903570248713875834875957825741114699041660"),
     );
+  }
+
+  static AddressPirvateKey aliceEthPrivateKey(int seed) {
+    final alice = StealthPrivateKey.alice;
+    final ECDomainParameters params = ECCurve_secp256k1();
+
+    // final staticRandom = Random(seed);
+    // final r = generateNewPrivateKey(staticRandom);
+    final r = BigInt.from(seed);
+    final rPubPoint = (params.G * r)!;
+    // alice calculate announcement
+    final ephemeralPubKey =
+        Uint8List.view(rPubPoint.getEncoded(false).buffer, 1);
+
+    final aliceX =
+        BigInt.parse(bytesToHex(ephemeralPubKey.sublist(0, 32)), radix: 16);
+    final aliceY =
+        BigInt.parse(bytesToHex(ephemeralPubKey.sublist(32)), radix: 16);
+    final aliceSharedSecret =
+        (ECCurve_secp256k1().curve.createPoint(aliceX, aliceY) * alice.v)!
+            .x!
+            .toBigInteger()!;
+    final stealthPrivateKey = alice.k + aliceSharedSecret;
+
+    final truePrivateKey =
+        bytesToHex(intToBytes(stealthPrivateKey)).replaceFirst("01", "");
+    final address = EthPrivateKey.fromHex(truePrivateKey).address.hex;
+    return (
+      address,
+      truePrivateKey,
+    );
+  }
+
+  get sharedSecret {
+    final shared1 = (vPubPoint() * k)!;
+    final shared2 = (kPubPoint() * v)!;
+    assert(shared1 == shared2);
+    return shared1.x!.toBigInteger()!;
   }
 
   String toEncodeStr(String name) {

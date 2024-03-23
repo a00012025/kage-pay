@@ -321,7 +321,7 @@ class QrcodeCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: PrettyQrView.data(
-              data: StealthPrivateKey.alice().toEncodeStr(name),
+              data: StealthPrivateKey.alice.toEncodeStr(name),
               decoration: const PrettyQrDecoration(
                 image: PrettyQrDecorationImage(
                   image: AssetImage('assets/icons/USDC.png'),
@@ -334,7 +334,7 @@ class QrcodeCard extends StatelessWidget {
             onPressed: () {
               Clipboard.setData(
                 ClipboardData(
-                  text: StealthPrivateKey.alice().toEncodeStr(name),
+                  text: StealthPrivateKey.alice.toEncodeStr(name),
                 ),
               );
             },

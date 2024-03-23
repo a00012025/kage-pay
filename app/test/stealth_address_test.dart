@@ -10,8 +10,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
+import 'package:web3dart/web3dart.dart';
 
 void main() {
+  test('alice stealth address', () {
+    final result = StealthPrivateKey.aliceEthPrivateKey(1);
+    final privateKey = EthPrivateKey.fromHex(
+        "0x0844f3751f423af85a869311af48b60f29d6f19b302ced833ed9e3045c737702");
+    final address = privateKey.address;
+    debugPrint('=======result : $result=========');
+    debugPrint('=======address : $address=========');
+  });
   test('stealth service', () {
     final service = StealthService();
 
