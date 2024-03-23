@@ -28,8 +28,6 @@ contract TokenPaymaster is BasePaymaster, OracleHelper {
     struct TokenPaymasterConfig {
         /// @notice The price markup percentage applied to the token price (1e26 = 100%). Ranges from 1e26 to 2e26
         uint256 priceMarkup;
-        /// @notice Exchange tokens to native currency if the EntryPoint balance of this Paymaster falls below this value
-        uint128 minEntryPointBalance;
         /// @notice Estimated gas cost for refunding tokens after the transaction is completed
         uint48 refundPostopCost;
         /// @notice Transactions are only valid as long as the cached price is not older than this value
