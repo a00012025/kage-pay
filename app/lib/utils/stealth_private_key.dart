@@ -24,7 +24,7 @@ class StealthPrivateKey {
     );
   }
 
-  static AddressPirvateKey aliceEthPrivateKey(int seed) {
+  static AddressPirvateKey aliceAddressPrivateKey(int seed) {
     final alice = StealthPrivateKey.alice;
     final ECDomainParameters params = ECCurve_secp256k1();
 
