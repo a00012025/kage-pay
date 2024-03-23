@@ -5,6 +5,7 @@ import 'package:app/utils/gaps.dart';
 import 'package:app/utils/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -223,7 +224,14 @@ class SendReceieveBtn extends StatelessWidget {
         Column(
           children: [
             DefaultButton(
-              onPressed: () {},
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return const QrcodeCard();
+                  },
+                );
+              },
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Image.asset(
@@ -252,6 +260,39 @@ class SendReceieveBtn extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class QrcodeCard extends StatelessWidget {
+  const QrcodeCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: PrettyQrView.data(
+              data: 'lorem ipsum dolor sit amet',
+              decoration: const PrettyQrDecoration(
+                image: PrettyQrDecorationImage(
+                  image: AssetImage('assets/icons/USDC.png'),
+                ),
+              ),
+            ),
+          ),
+          Gaps.h24,
+          DefaultButton(
+            onPressed: () {},
+            text: "Copy Data",
+          ),
+        ],
+      ),
     );
   }
 }
