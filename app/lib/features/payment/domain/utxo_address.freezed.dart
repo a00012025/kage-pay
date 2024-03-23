@@ -21,7 +21,7 @@ UtxoAddress _$UtxoAddressFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$UtxoAddress {
   String get address => throw _privateConstructorUsedError;
-  double get balance => throw _privateConstructorUsedError;
+  BigInt get balance => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -35,7 +35,7 @@ abstract class $UtxoAddressCopyWith<$Res> {
           UtxoAddress value, $Res Function(UtxoAddress) then) =
       _$UtxoAddressCopyWithImpl<$Res, UtxoAddress>;
   @useResult
-  $Res call({String address, double balance});
+  $Res call({String address, BigInt balance});
 }
 
 /// @nodoc
@@ -62,7 +62,7 @@ class _$UtxoAddressCopyWithImpl<$Res, $Val extends UtxoAddress>
       balance: null == balance
           ? _value.balance
           : balance // ignore: cast_nullable_to_non_nullable
-              as double,
+              as BigInt,
     ) as $Val);
   }
 }
@@ -75,7 +75,7 @@ abstract class _$$UtxoAddressImplCopyWith<$Res>
       __$$UtxoAddressImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String address, double balance});
+  $Res call({String address, BigInt balance});
 }
 
 /// @nodoc
@@ -100,7 +100,7 @@ class __$$UtxoAddressImplCopyWithImpl<$Res>
       balance: null == balance
           ? _value.balance
           : balance // ignore: cast_nullable_to_non_nullable
-              as double,
+              as BigInt,
     ));
   }
 }
@@ -108,7 +108,7 @@ class __$$UtxoAddressImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UtxoAddressImpl implements _UtxoAddress {
-  const _$UtxoAddressImpl({required this.address, this.balance = 0.0});
+  const _$UtxoAddressImpl({required this.address, required this.balance});
 
   factory _$UtxoAddressImpl.fromJson(Map<String, dynamic> json) =>
       _$$UtxoAddressImplFromJson(json);
@@ -116,8 +116,7 @@ class _$UtxoAddressImpl implements _UtxoAddress {
   @override
   final String address;
   @override
-  @JsonKey()
-  final double balance;
+  final BigInt balance;
 
   @override
   String toString() {
@@ -154,7 +153,7 @@ class _$UtxoAddressImpl implements _UtxoAddress {
 abstract class _UtxoAddress implements UtxoAddress {
   const factory _UtxoAddress(
       {required final String address,
-      final double balance}) = _$UtxoAddressImpl;
+      required final BigInt balance}) = _$UtxoAddressImpl;
 
   factory _UtxoAddress.fromJson(Map<String, dynamic> json) =
       _$UtxoAddressImpl.fromJson;
@@ -162,7 +161,7 @@ abstract class _UtxoAddress implements UtxoAddress {
   @override
   String get address;
   @override
-  double get balance;
+  BigInt get balance;
   @override
   @JsonKey(ignore: true)
   _$$UtxoAddressImplCopyWith<_$UtxoAddressImpl> get copyWith =>

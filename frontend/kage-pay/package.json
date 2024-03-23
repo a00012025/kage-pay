@@ -15,6 +15,7 @@
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.20",
     "lucide-react": "^0.363.0",
+    "mint.club-v2-sdk": "^0.0.88",
     "next": "14.1.4",
     "qrcode.react": "^3.1.0",
     "react": "^18",

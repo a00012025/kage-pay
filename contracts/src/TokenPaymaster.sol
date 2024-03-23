@@ -51,7 +51,7 @@ contract TokenPaymaster is BasePaymaster, OracleHelper {
     TokenPaymasterConfig public tokenPaymasterConfig;
 
     /// @notice The ERC20 token used for transaction fee payments
-    IERC20 public immutable token;
+    IERC20Metadata public immutable token;
 
     /// @notice Initializes the TokenPaymaster contract with the given parameters.
     /// @param _token The ERC20 token used for transaction fee payments.
@@ -141,8 +141,10 @@ contract TokenPaymaster is BasePaymaster, OracleHelper {
                     cachedPriceWithMarkup = clientSuppliedPrice;
                 }
             }
+            uint8 tokenDecimals = token.decimals();
             uint256 tokenAmount = weiToToken(
                 preChargeNative,
+                tokenDecimals,
                 cachedPriceWithMarkup
             );
             SafeERC20.safeTransferFrom(
@@ -162,9 +164,18 @@ contract TokenPaymaster is BasePaymaster, OracleHelper {
 
     function weiToToken(
         uint256 amount,
+        uint8 tokenDecimals,
         uint256 price
     ) public pure returns (uint256) {
-        return (amount * PRICE_DENOMINATOR) / price;
+        if (tokenDecimals >= 18) {
+            return
+                (amount * PRICE_DENOMINATOR * 10 ** (tokenDecimals - 18)) /
+                price;
+        } else {
+            return
+                (amount * PRICE_DENOMINATOR) /
+                (price * 10 ** (18 - tokenDecimals));
+        }
     }
 
     /// @notice Performs post-operation tasks, such as updating the token price and refunding excess tokens.
@@ -194,8 +205,10 @@ contract TokenPaymaster is BasePaymaster, OracleHelper {
             uint256 actualChargeNative = actualGasCost +
                 tokenPaymasterConfig.refundPostopCost *
                 actualUserOpFeePerGas;
+            uint8 tokenDecimals = token.decimals();
             uint256 actualTokenNeeded = weiToToken(
                 actualChargeNative,
+                tokenDecimals,
                 cachedPriceWithMarkup
             );
             if (preCharge > actualTokenNeeded) {

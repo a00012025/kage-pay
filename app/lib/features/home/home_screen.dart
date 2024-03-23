@@ -1,10 +1,15 @@
+import 'package:app/features/collect_token/collect_token_screen.dart';
+import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
+import 'package:app/features/payment/domain/utxo_address.dart';
 import 'package:app/features/send_token/scan_address_screen.dart';
+import 'package:app/utils/app_tap.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/stealth_private_key.dart';
 import 'package:app/utils/string_utils.dart';
+import 'package:app/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,53 +59,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userData = ref.watch(userDataControllerProvider);
+    final userUtxoAddress = ref.watch(userUtxoAddressProvider);
+    debugPrint('======={userUtxoAddress} : $userUtxoAddress=========');
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: AnimationLimiter(
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: <Widget>[
-              SliverAppBar(
-                pinned: true, // 固定AppBar在顶部
-                surfaceTintColor: Colors.transparent,
-                expandedHeight: 300.0,
-
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  title: Opacity(
-                    opacity: _opacity,
-                    child: AppBarSmall(userData: userData),
-                  ),
-                  background: Column(
-                    children: [
-                      Gaps.h32,
-                      TotalBalanceWidget(userData: userData),
-                      Gaps.h32,
-                      SendReceieveBtn(
-                        name: userData.name,
-                      ),
-                      Gaps.h32,
-                    ],
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.read(userUtxoAddressProvider.notifier).updateState();
+            },
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: <Widget>[
+                SliverAppBar(
+                  pinned: true, // 固定AppBar在顶部
+                  surfaceTintColor: Colors.transparent,
+                  expandedHeight: 300.0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    title: Opacity(
+                      opacity: _opacity,
+                      child: AppBarSmall(userData: userData),
+                    ),
+                    background: Column(
+                      children: [
+                        Gaps.h32,
+                        userUtxoAddress.when(
+                          data: (value) {
+                            return TotalBalanceWidget(
+                              userData: userData,
+                              totalBalance: getBalance(value),
+                            );
+                          },
+                          loading: () => const CircularProgressIndicator(),
+                          error: (error, _) => Text('Error: $error'),
+                        ),
+                        Gaps.h32,
+                        // AppTap(
+                        //   onTap: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => const SendTokenScreen(
+                        //             "dora",
+                        //             "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"),
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: const Text("test"),
+                        // ),
+                        SendReceieveBtn(
+                          name: userData.name,
+                        ),
+                        Gaps.h32,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 375),
-                      child: const SlideAnimation(
-                        verticalOffset: 150.0,
-                        child: TxHistoryItem(),
+                userUtxoAddress.when(
+                  data: (value) {
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 150.0,
+                              child: TxHistoryItem(
+                                value: value[index],
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: value.length,
                       ),
                     );
                   },
-                  childCount: 100,
+                  loading: () => const SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  error: (error, _) => SliverToBoxAdapter(
+                    child: Center(
+                      child: Text('Error: $error'),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -109,75 +161,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class TxHistoryItem extends StatelessWidget {
-  const TxHistoryItem({
+  TxHistoryItem({
     super.key,
+    required this.value,
   });
+
+  final UtxoAddress value;
+
+  final emojis = [
+    '🥷',
+    '👨‍🚀',
+    '👨‍🚒',
+    '👨‍🎨',
+    '👨‍🎤',
+    '👨‍🏫',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '🥷',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontSize: 24,
-                    ),
-              ),
+      child: AppTap(
+        onTap: () {
+          Clipboard.setData(
+            ClipboardData(
+              text: value.address,
             ),
-            Gaps.w16,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Receieved",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
+          );
+          customToast(
+            'Copied to clipboard!',
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
                 ),
-                Text(
-                  "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"
-                      .toFormattedAddress(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  emojis[value.address.hashCode % emojis.length],
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: 24,
+                      ),
                 ),
-              ],
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              ),
+              Gaps.w16,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "+1000",
-                    textAlign: TextAlign.end,
+                    "Receieved",
                     style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    value.address.toFormattedAddress(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Gaps.w4,
-                  Image.asset('assets/icons/USDC.png', width: 24),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "${value.balance / BigInt.from(10).pow(6)}",
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Gaps.w4,
+                    Image.asset('assets/icons/USDC.png', width: 24),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -286,6 +361,29 @@ class SendReceieveBtn extends StatelessWidget {
             const Text("Send"),
           ],
         ),
+        Gaps.w24,
+        Column(
+          children: [
+            DefaultButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CollectTokenScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Image.asset(
+                  'assets/icons/collect.png',
+                  width: 32,
+                ),
+              ),
+            ),
+            const Text("Collect"),
+          ],
+        ),
       ],
     );
   }
@@ -308,7 +406,7 @@ class QrcodeCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: PrettyQrView.data(
-              data: StealthPrivateKey.alice().toEncodeStr(name),
+              data: StealthPrivateKey.alice.toEncodeStr(name),
               decoration: const PrettyQrDecoration(
                 image: PrettyQrDecorationImage(
                   image: AssetImage('assets/icons/USDC.png'),
@@ -321,8 +419,11 @@ class QrcodeCard extends StatelessWidget {
             onPressed: () {
               Clipboard.setData(
                 ClipboardData(
-                  text: StealthPrivateKey.alice().toEncodeStr(name),
+                  text: StealthPrivateKey.alice.toEncodeStr(name),
                 ),
+              );
+              customToast(
+                'Copied to clipboard!',
               );
             },
             text: "Copy Data",
@@ -338,9 +439,11 @@ class TotalBalanceWidget extends StatelessWidget {
   const TotalBalanceWidget({
     super.key,
     required this.userData,
+    required this.totalBalance,
   });
 
   final UserData userData;
+  final String totalBalance;
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +468,7 @@ class TotalBalanceWidget extends StatelessWidget {
             //richText with decimal
             RichText(
               text: TextSpan(
-                text: userData.totalBalance.split('.')[0],
+                text: totalBalance.split('.')[0],
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.black,
                       fontSize: 48,
@@ -373,8 +476,8 @@ class TotalBalanceWidget extends StatelessWidget {
                     ),
                 children: [
                   TextSpan(
-                    text: userData.totalBalance.split('.').length > 1
-                        ? '.${userData.totalBalance.split('.')[1]}'
+                    text: totalBalance.split('.').length > 1
+                        ? '.${totalBalance.split('.')[1]}'
                         : '.00',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,

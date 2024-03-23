@@ -3,6 +3,10 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:app/features/common/constants.dart';
+import 'package:app/features/common/contract/entry_point_contract.dart';
+import 'package:app/features/common/contract/simple_account_factory_contract.dart';
+import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
 import 'package:app/utils/stealth_private_key.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +16,55 @@ import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
 
 void main() {
+  test('get usdc balance', () async {
+    final contract = EntryPointContract.create();
+    for (var i = 1; i < 4; i++) {
+      final client = PaymentService.getWeb3Client();
+      final res = await client.call(
+        contract: contract,
+        function: contract.getNonce,
+        params: [
+          StealthPrivateKey.aliceStealthPrivateKey(i).address,
+          BigInt.zero,
+        ],
+      );
+      print(res);
+    }
+  });
+  // test('get usdc balance', () async {
+  //   final erc20 = Erc20Contract.create();
+  //   for (var i = 1; i < 4; i++) {
+  //     final client = PaymentService.getWeb3Client();
+  //     final res = await client.call(
+  //       contract: erc20,
+  //       function: erc20.balanceOf,
+  //       params: [
+  //         StealthPrivateKey.getAliceContractAddress(i),
+  //       ],
+  //     );
+  //     print(res);
+  //   }
+  // });
+  test('alice stealth address', () async {
+    for (var i = 1; i < 4; i++) {
+      final privateKey = StealthPrivateKey.aliceStealthPrivateKey(i);
+
+      final simpleAccount = SimpleAccountFactoryContract.create();
+
+      final client = PaymentService.getWeb3Client();
+      final res = await client.call(
+        contract: simpleAccount,
+        function: simpleAccount.getAddress,
+        params: [
+          privateKey.address,
+          Constants.usdc,
+          Constants.payMaster,
+          BigInt.zero,
+        ],
+      );
+      print(res);
+    }
+  });
   test('stealth service', () {
     final service = StealthService();
 
@@ -65,6 +118,14 @@ void main() {
     print("bobSharedSecret: ${bytesToHex(intToBytes(bobSharedSecret))}");
     final stealthPrivateKey = bob.k + bobSharedSecret;
     print("stealthPrivateKey: 0x${bytesToHex(intToBytes(stealthPrivateKey))}");
+    final stPubKey = privateKeyToPublic(stealthPrivateKey);
+
+    final Gx = params.G.x!.toBigInteger()!;
+    final Gy = params.G.y!.toBigInteger()!;
+    print("Gx: ${bytesToHex(intToBytes(Gx))}");
+    print("Gy: ${bytesToHex(intToBytes(Gy))}");
+
+    print("stealthPublicKey: ${bytesToHex(stPubKey)}");
     final bobRecoveredAddress =
         publicKeyToAddress(privateKeyToPublic(stealthPrivateKey));
     print('bobRecoveredAddress: 0x${bytesToHex(bobRecoveredAddress)}');

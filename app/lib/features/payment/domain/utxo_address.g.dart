@@ -9,11 +9,11 @@ part of 'utxo_address.dart';
 _$UtxoAddressImpl _$$UtxoAddressImplFromJson(Map<String, dynamic> json) =>
     _$UtxoAddressImpl(
       address: json['address'] as String,
-      balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
+      balance: BigInt.parse(json['balance'] as String),
     );
 
 Map<String, dynamic> _$$UtxoAddressImplToJson(_$UtxoAddressImpl instance) =>
     <String, dynamic>{
       'address': instance.address,
-      'balance': instance.balance,
+      'balance': instance.balance.toString(),
     };

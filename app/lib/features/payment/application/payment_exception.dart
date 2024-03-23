@@ -1,6 +1,6 @@
 class InsufficientBalanceException implements Exception {
-  final double availableBalance;
-  final double requiredBalance;
+  final BigInt availableBalance;
+  final BigInt requiredBalance;
 
   InsufficientBalanceException({
     required this.availableBalance,
