@@ -7,7 +7,7 @@ part 'utxo_address.g.dart';
 class UtxoAddress with _$UtxoAddress {
   const factory UtxoAddress({
     required String address,
-    @Default(0.0) double balance,
+    required BigInt balance,
   }) = _UtxoAddress;
 
   factory UtxoAddress.fromJson(Map<String, dynamic> json) =>

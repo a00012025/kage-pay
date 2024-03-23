@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
 import 'package:app/utils/default_button.dart';
@@ -131,6 +133,7 @@ class _SendTokenScreenState extends ConsumerState<SendTokenScreen> {
                         return SuccessCard(
                           address: widget.addressAndEphemeralPubKey.$1,
                           amount: textEditingController.text,
+                          ephPubKey: widget.addressAndEphemeralPubKey.$2,
                         );
                       });
                   Navigator.pop(context);
@@ -151,10 +154,12 @@ class SuccessCard extends StatefulWidget {
     super.key,
     required this.address,
     required this.amount,
+    required this.ephPubKey,
   });
 
   final String address;
   final String amount;
+  final Uint8List ephPubKey;
 
   @override
   State<SuccessCard> createState() => _SuccessCardState();
@@ -173,9 +178,7 @@ class _SuccessCardState extends State<SuccessCard> {
   void asyncInit() async {
     final service = PaymentService();
     hash = await service.sendUserOperation(
-      widget.amount,
-      widget.address,
-    );
+        widget.amount, widget.address, widget.ephPubKey);
     setState(() {
       isSuccess = true;
     });

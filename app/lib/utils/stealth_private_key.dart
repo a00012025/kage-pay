@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:app/features/common/contract/erc20_contract.dart';
+import 'package:app/features/payment/application/payment_service.dart';
+import 'package:app/features/payment/domain/utxo_address.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
-
-typedef AddressPirvateKey = (String address, String privateKey);
 
 class StealthPrivateKey {
   final BigInt k;
@@ -24,7 +25,42 @@ class StealthPrivateKey {
     );
   }
 
-  static AddressPirvateKey aliceAddressPrivateKey(int seed) {
+  static Future<List<UtxoAddress>> getAllUtxo() async {
+    final res = <UtxoAddress>[];
+    for (var i = 1; i < 4; i++) {
+      res.add(await getAliceContractAddress(i));
+    }
+    return res;
+  }
+
+  static Future<UtxoAddress> getAliceContractAddress(int seed) async {
+    if (seed > 3) {
+      throw Exception("seed must be less than 3");
+    }
+    final addressList = {
+      1: "0x7a3afa306a0f095afef8ba7cc1a71f2ff20746c4",
+      2: "0xc957840ce4cbed0e6eacc5003b057d2c67b24c45",
+      3: "0xc7a1810f3cef51608ea47f5b0d5190495b0c4eb5"
+    };
+
+    final address = EthereumAddress.fromHex(addressList[seed]!);
+    final erc20 = Erc20Contract.create();
+
+    final client = PaymentService.getWeb3Client();
+    final res = await client.call(
+      contract: erc20,
+      function: erc20.balanceOf,
+      params: [
+        address,
+      ],
+    );
+    return UtxoAddress(
+      address: address.hex,
+      balance: res.first as BigInt,
+    );
+  }
+
+  static EthPrivateKey aliceAddressPrivateKey(int seed) {
     final alice = StealthPrivateKey.alice;
     final ECDomainParameters params = ECCurve_secp256k1();
 
@@ -48,11 +84,7 @@ class StealthPrivateKey {
 
     final truePrivateKey =
         bytesToHex(intToBytes(stealthPrivateKey)).replaceFirst("01", "");
-    final address = EthPrivateKey.fromHex(truePrivateKey).address.hex;
-    return (
-      address,
-      truePrivateKey,
-    );
+    return EthPrivateKey.fromHex(truePrivateKey);
   }
 
   get sharedSecret {
@@ -140,6 +172,4 @@ class StealthPrivateKey {
     final y = BigInt.parse(bytesToHex(vPubBytes().sublist(32)), radix: 16);
     return ECCurve_secp256k1().curve.createPoint(x, y);
   }
-
-  
 }

@@ -3,6 +3,10 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:app/features/common/constants.dart';
+import 'package:app/features/common/contract/erc20_contract.dart';
+import 'package:app/features/common/contract/simple_account_factory_contract.dart';
+import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
 import 'package:app/utils/stealth_private_key.dart';
 import 'package:flutter/material.dart';
@@ -10,16 +14,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
-import 'package:web3dart/web3dart.dart';
 
 void main() {
-  test('alice stealth address', () {
-    final result = StealthPrivateKey.aliceAddressPrivateKey(1);
-    final privateKey = EthPrivateKey.fromHex(
-        "0x0844f3751f423af85a869311af48b60f29d6f19b302ced833ed9e3045c737702");
-    final address = privateKey.address;
-    debugPrint('=======result : $result=========');
-    debugPrint('=======address : $address=========');
+  test('get usdc balance', () async {
+    final erc20 = Erc20Contract.create();
+    for (var i = 1; i < 4; i++) {
+      final client = PaymentService.getWeb3Client();
+      final res = await client.call(
+        contract: erc20,
+        function: erc20.balanceOf,
+        params: [
+          StealthPrivateKey.getAliceContractAddress(i),
+        ],
+      );
+      print(res);
+    }
+  });
+  test('alice stealth address', () async {
+    for (var i = 1; i < 4; i++) {
+      final privateKey = StealthPrivateKey.aliceAddressPrivateKey(i);
+
+      final simpleAccount = SimpleAccountFactoryContract.create();
+
+      final client = PaymentService.getWeb3Client();
+      final res = await client.call(
+        contract: simpleAccount,
+        function: simpleAccount.getAddress,
+        params: [
+          privateKey.address,
+          Constants.usdc,
+          Constants.payMaster,
+          BigInt.zero,
+        ],
+      );
+      print(res);
+    }
   });
   test('stealth service', () {
     final service = StealthService();

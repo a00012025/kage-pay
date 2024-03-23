@@ -9,6 +9,7 @@ import 'package:app/features/payment/application/payment_exception.dart';
 import 'package:app/features/payment/domain/chain.dart';
 import 'package:app/features/payment/domain/user_operation.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
+import 'package:app/utils/stealth_private_key.dart';
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -28,26 +29,31 @@ class PaymentService {
   }
 
   Future<List<UtxoAddress>> getAddressesToSend({
-    required List<String> addresses,
-    required double amountToSend,
+    required List<UtxoAddress> addresses,
+    required BigInt amountToSend,
   }) async {
     var sortedAddresses = List<UtxoAddress>.from(addresses)
       ..sort((a, b) => b.balance.compareTo(a.balance));
-    double availableBalance = 0.0;
+    BigInt needFound = amountToSend;
+    BigInt tempFound = BigInt.zero;
 
     List<UtxoAddress> selectedAddresses = [];
     for (var utxo in sortedAddresses) {
-      selectedAddresses.add(utxo);
-      availableBalance += utxo.balance;
-
-      if (availableBalance >= amountToSend) {
+      tempFound = needFound;
+      needFound -= utxo.balance;
+      if (needFound <= BigInt.zero) {
+        selectedAddresses.add(utxo.copyWith(
+          balance: tempFound,
+        ));
         break;
+      } else {
+        selectedAddresses.add(utxo);
       }
     }
 
-    if (availableBalance < amountToSend) {
+    if (needFound > BigInt.zero) {
       final exception = InsufficientBalanceException(
-        availableBalance: availableBalance,
+        availableBalance: needFound,
         requiredBalance: amountToSend,
       );
       debugPrint(exception.toString());
@@ -57,16 +63,8 @@ class PaymentService {
     return selectedAddresses;
   }
 
-  List<UserOperation> getUserOperations() {
-    return [];
-  }
-
   Future<UserOperation> signUserOperations(
-      BigInt amountToSend, String address, String ephPubKey) async {
-    // final innerCallData = encodeErc20TransferFunctionCall(
-    //   to: Constants.receiver,
-    //   amount: BigInt.from(5000000),
-    // );
+      BigInt amountToSend, String address, Uint8List ephPubKey) async {
     final approveCallData = encodeErc20ApproveFunctionCall(
       address: Constants.erc5564Announcer,
       amount: amountToSend,
@@ -75,15 +73,8 @@ class PaymentService {
       to: EthereumAddress.fromHex(address),
       tokenAddress: Constants.usdc,
       amount: amountToSend,
-    pk: ephPubKey,
+      pk: bytesToHex(ephPubKey),
     );
-
-    // final callData =
-    //     encodeExecuteFunctionCall(address: Constants.simpleAccount, params: [
-    //   Constants.usdc,
-    //   BigInt.zero,
-    //   innerCallData,
-    // ]);
 
     final callData = encodeExecuteBatchFunctionCall(
         address: Constants.simpleAccount,
@@ -135,30 +126,38 @@ class PaymentService {
     return op;
   }
 
-  Future<String> sendUserOperation(String amountToSend, String address) async {
+  Future<List<UserOperation>> getUserOperations(
+      String amountToSend, Uint8List ephPubKey) async {
+    final allUtxos = await StealthPrivateKey.getAllUtxo();
     final amount = (double.tryParse(amountToSend) ?? 0.0) * 1000000;
     final rawAmount = BigInt.from(amount);
-    const ephPubKey =
-        '0xa0b5593dc1a6f484c011d77a20064ec224e51d4d252785be47ff22e40ad13f52377c6d5a3528fb4d95b0a4b54068a038546214170d50aed1bb2f384e6d73e687';
-    final op = await signUserOperations(rawAmount, address, ephPubKey);
+
+    final selectedUtxos = await getAddressesToSend(
+      addresses: allUtxos,
+      amountToSend: rawAmount,
+    );
+
+    List<UserOperation> ops = [];
+    for (var utxo in selectedUtxos) {
+      final op =
+          await signUserOperations(utxo.balance, utxo.address, ephPubKey);
+      ops.add(op);
+    }
+    return ops;
+  }
+
+  Future<String> sendUserOperation(
+      String sendAmount, String address, Uint8List ephPubKey) async {
+    final ops = await getUserOperations(sendAmount, ephPubKey);
     final client = getWeb3Client();
 
     final cred = EthPrivateKey.fromHex(tempPrivateKey);
-
-    final res = entryPointContract.handleOps.encodeCall(
-      [
-        [op.toList()],
-        Constants.myAddress,
-      ],
-    );
-
-    log(bytesToHex(res));
 
     final transaction = Transaction.callContract(
       contract: entryPointContract,
       function: entryPointContract.handleOps,
       parameters: [
-        [op.toList()],
+        ops.map((e) => e.toList()),
         Constants.myAddress,
       ],
       maxGas: 1000000,
