@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@aa/contracts/core/BaseAccount.sol";
 import "@aa/contracts/core/Helpers.sol";
 import "./TokenCallbackHandler.sol";
@@ -110,12 +111,23 @@ contract SimpleAccount is
      * the implementation by calling `upgradeTo()`
      * @param anOwner the owner (signer) of this account
      */
-    function initialize(address anOwner) public virtual initializer {
-        _initialize(anOwner);
+    function initialize(
+        address anOwner,
+        address anTokenAddress,
+        address anPaymaster
+    ) public virtual initializer {
+        _initialize(anOwner, anTokenAddress, anPaymaster);
     }
 
-    function _initialize(address anOwner) internal virtual {
+    function _initialize(
+        address anOwner,
+        address anTokenAddress,
+        address anPaymaster
+    ) internal virtual {
         owner = anOwner;
+        if (anTokenAddress != address(0)) {
+            IERC20(anTokenAddress).approve(anPaymaster, type(uint256).max);
+        }
         emit SimpleAccountInitialized(_entryPoint, owner);
     }
 
