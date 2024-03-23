@@ -44,6 +44,11 @@ dependencies:
   pointycastle: ^3.7.4
   pretty_qr_code: ^3.3.0
   http: ^1.1.0
+  eth_sig_util: ^0.0.9
+  convert: ^3.1.1
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

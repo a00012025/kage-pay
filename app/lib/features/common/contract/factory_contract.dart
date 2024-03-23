@@ -1,13 +1,14 @@
 import 'dart:convert';
 
+import 'package:app/features/common/constants.dart';
 import 'package:web3dart/web3dart.dart';
 
-class Deployed4337Contract extends DeployedContract {
-  Deployed4337Contract(super.abi, super.address);
-  static Deployed4337Contract create() {
-    return Deployed4337Contract(
-      ContractAbi.fromJson(jsonEncode(abi4337), '4337'),
-      EthereumAddress.fromHex("0x586b31774d15ee066c95D22A72A5De71eAA95125"),
+class FactoryContract extends DeployedContract {
+  FactoryContract(super.abi, super.address);
+  static FactoryContract create() {
+    return FactoryContract(
+      ContractAbi.fromJson(jsonEncode(factoryContractAbi), 'factory_contract'),
+      Constants.simpleAccountFactory,
     );
   }
 
@@ -28,7 +29,7 @@ class Deployed4337Contract extends DeployedContract {
       function('accountImplementation');
 }
 
-final abi4337 = [
+final factoryContractAbi = [
   {
     "inputs": [
       {
@@ -52,6 +53,12 @@ final abi4337 = [
   {
     "inputs": [
       {"internalType": "address", "name": "owner", "type": "address"},
+      {
+        "internalType": "address",
+        "name": "paymasterTokenAddress",
+        "type": "address"
+      },
+      {"internalType": "address", "name": "paymaster", "type": "address"},
       {"internalType": "uint256", "name": "salt", "type": "uint256"}
     ],
     "name": "createAccount",
@@ -68,6 +75,12 @@ final abi4337 = [
   {
     "inputs": [
       {"internalType": "address", "name": "owner", "type": "address"},
+      {
+        "internalType": "address",
+        "name": "paymasterTokenAddress",
+        "type": "address"
+      },
+      {"internalType": "address", "name": "paymaster", "type": "address"},
       {"internalType": "uint256", "name": "salt", "type": "uint256"}
     ],
     "name": "getAddress",
