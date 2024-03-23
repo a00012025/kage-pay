@@ -1,5 +1,5 @@
-import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/collect_token/collect_token_screen.dart';
+import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
 import 'package:app/features/home/domain/userdata.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
