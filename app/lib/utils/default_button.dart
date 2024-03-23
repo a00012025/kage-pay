@@ -6,15 +6,19 @@ import 'package:flutter_animate/flutter_animate.dart';
 class DefaultButton extends StatelessWidget {
   const DefaultButton({
     required this.onPressed,
-    required this.text,
+    this.text = '',
     this.textStyle,
     super.key,
     this.isDisable = false,
+    this.showIcon = true,
+    this.child,
   });
   final VoidCallback onPressed;
   final String text;
   final TextStyle? textStyle;
   final bool isDisable;
+  final bool showIcon;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +31,17 @@ class DefaultButton extends StatelessWidget {
               color: isDisable ? Colors.grey : Colors.black,
               borderRadius: BorderRadius.circular(Spacings.px12),
             ),
-            child: Container(
-              width: double.maxFinite,
-              padding: const EdgeInsets.all(Spacings.px12),
-              child: Text(text,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      )),
-            ),
+            child: child ??
+                Container(
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.all(Spacings.px12),
+                  child: Text(text,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          )),
+                ),
           )
               .animate(
                   onPlay: (controller) => controller.repeat(reverse: false))
@@ -44,16 +49,17 @@ class DefaultButton extends StatelessWidget {
                 duration: const Duration(milliseconds: 1300),
                 delay: const Duration(milliseconds: 3000),
               ),
-          Positioned(
-            top: 12,
-            child: Padding(
-              padding: const EdgeInsets.only(left: Spacings.px8),
-              child: Image.asset(
-                'assets/icons/ninja_white.png',
-                width: 24,
+          if (showIcon)
+            Positioned(
+              top: 12,
+              child: Padding(
+                padding: const EdgeInsets.only(left: Spacings.px8),
+                child: Image.asset(
+                  'assets/icons/ninja_white.png',
+                  width: 24,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

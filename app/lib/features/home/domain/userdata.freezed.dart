@@ -21,6 +21,7 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$UserData {
   String get name => throw _privateConstructorUsedError;
+  String get totalBalance => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -33,7 +34,7 @@ abstract class $UserDataCopyWith<$Res> {
   factory $UserDataCopyWith(UserData value, $Res Function(UserData) then) =
       _$UserDataCopyWithImpl<$Res, UserData>;
   @useResult
-  $Res call({String name});
+  $Res call({String name, String totalBalance});
 }
 
 /// @nodoc
@@ -50,11 +51,16 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
   @override
   $Res call({
     Object? name = null,
+    Object? totalBalance = null,
   }) {
     return _then(_value.copyWith(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      totalBalance: null == totalBalance
+          ? _value.totalBalance
+          : totalBalance // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -68,7 +74,7 @@ abstract class _$$UserDataImplCopyWith<$Res>
       __$$UserDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name});
+  $Res call({String name, String totalBalance});
 }
 
 /// @nodoc
@@ -83,11 +89,16 @@ class __$$UserDataImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = null,
+    Object? totalBalance = null,
   }) {
     return _then(_$UserDataImpl(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      totalBalance: null == totalBalance
+          ? _value.totalBalance
+          : totalBalance // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -96,17 +107,20 @@ class __$$UserDataImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UserDataImpl implements _UserData {
-  _$UserDataImpl({required this.name});
+  _$UserDataImpl({required this.name, this.totalBalance = "0"});
 
   factory _$UserDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserDataImplFromJson(json);
 
   @override
   final String name;
+  @override
+  @JsonKey()
+  final String totalBalance;
 
   @override
   String toString() {
-    return 'UserData(name: $name)';
+    return 'UserData(name: $name, totalBalance: $totalBalance)';
   }
 
   @override
@@ -114,12 +128,14 @@ class _$UserDataImpl implements _UserData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserDataImpl &&
-            (identical(other.name, name) || other.name == name));
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.totalBalance, totalBalance) ||
+                other.totalBalance == totalBalance));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, name);
+  int get hashCode => Object.hash(runtimeType, name, totalBalance);
 
   @JsonKey(ignore: true)
   @override
@@ -136,13 +152,16 @@ class _$UserDataImpl implements _UserData {
 }
 
 abstract class _UserData implements UserData {
-  factory _UserData({required final String name}) = _$UserDataImpl;
+  factory _UserData({required final String name, final String totalBalance}) =
+      _$UserDataImpl;
 
   factory _UserData.fromJson(Map<String, dynamic> json) =
       _$UserDataImpl.fromJson;
 
   @override
   String get name;
+  @override
+  String get totalBalance;
   @override
   @JsonKey(ignore: true)
   _$$UserDataImplCopyWith<_$UserDataImpl> get copyWith =>

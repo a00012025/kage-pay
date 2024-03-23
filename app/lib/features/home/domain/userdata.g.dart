@@ -9,9 +9,11 @@ part of 'userdata.dart';
 _$UserDataImpl _$$UserDataImplFromJson(Map<String, dynamic> json) =>
     _$UserDataImpl(
       name: json['name'] as String,
+      totalBalance: json['totalBalance'] as String? ?? "0",
     );
 
 Map<String, dynamic> _$$UserDataImplToJson(_$UserDataImpl instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'totalBalance': instance.totalBalance,
     };
