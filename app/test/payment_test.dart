@@ -1,4 +1,3 @@
-
 import 'package:app/features/payment/application/payment_exception.dart';
 import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
@@ -91,5 +90,17 @@ main() {
         );
       }, throwsA(isA<InsufficientBalanceException>()));
     });
+  });
+
+  test('sign op', () {
+    final signedOp = paymentService.signUserOperations();
+    print(signedOp.signature);
+  });
+  test('send op', () async {
+    final signedOp = paymentService.signUserOperations();
+    print(signedOp.signature);
+
+    final hash = await paymentService.sendUserOperation(signedOp);
+    print(hash);
   });
 }

@@ -44,6 +44,8 @@ dependencies:
   pointycastle: ^3.7.4
   pretty_qr_code: ^3.3.0
   http: ^1.1.0
+  eth_sig_util: ^0.0.9
+  convert: ^3.1.1
   numeric_keyboard: ^1.1.0
   qr_code_scanner: ^1.0.1
 
