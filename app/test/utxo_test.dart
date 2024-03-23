@@ -1,6 +1,7 @@
-import 'package:app/feat/payment/application/payment_exception.dart';
-import 'package:app/feat/payment/application/payment_service.dart';
-import 'package:app/feat/payment/domain/utxo_address.dart';
+
+import 'package:app/features/payment/application/payment_exception.dart';
+import 'package:app/features/payment/application/payment_service.dart';
+import 'package:app/features/payment/domain/utxo_address.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 main() {
