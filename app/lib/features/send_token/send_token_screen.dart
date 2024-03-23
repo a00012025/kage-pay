@@ -1,12 +1,14 @@
-import 'dart:typed_data';
-
 import 'package:app/features/payment/application/payment_service.dart';
 import 'package:app/features/stealth/stealth_service.dart';
+import 'package:app/utils/app_tap.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:app/utils/string_utils.dart';
+import 'package:app/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:oktoast/oktoast.dart';
 
 class SendTokenScreen extends ConsumerStatefulWidget {
   const SendTokenScreen(this.name, this.addressAndEphemeralPubKey, {super.key});
@@ -188,38 +190,44 @@ class _SuccessCardState extends State<SuccessCard> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Card(
-          color: Colors.white,
-          surfaceTintColor: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                isSuccess
-                    ? const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 48,
-                      )
-                    : Image.asset(
-                        'assets/icons/ninja_run.gif',
-                        width: 200,
-                      ),
-                Gaps.h16,
-                Text(
+      child: AppTap(
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: hash));
+          customToast('Copied to clipboard!');
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Card(
+            color: Colors.white,
+            surfaceTintColor: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   isSuccess
-                      ? "🥷：Mission Completed! ${hash.toFormattedAddress()}"
-                      : "🥷：We're working on it.",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                      ? const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 48,
+                        )
+                      : Image.asset(
+                          'assets/icons/ninja_run.gif',
+                          width: 200,
+                        ),
+                  Gaps.h16,
+                  Text(
+                    isSuccess
+                        ? "🥷：Mission Completed! ${hash.toFormattedAddress()}"
+                        : "🥷：We're working on it.",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

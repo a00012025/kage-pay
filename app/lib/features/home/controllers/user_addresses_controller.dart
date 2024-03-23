@@ -8,6 +8,7 @@ part 'user_addresses_controller.g.dart';
 class UserUtxoAddress extends _$UserUtxoAddress {
   Future<void> updateState() async {
     state = const AsyncLoading();
+
     state = await AsyncValue.guard(() async {
       return await StealthPrivateKey.getAllUtxo();
     });
@@ -15,6 +16,8 @@ class UserUtxoAddress extends _$UserUtxoAddress {
 
   @override
   FutureOr<List<UtxoAddress>> build() {
+    state = const AsyncLoading();
+
     updateState();
     return [];
   }

@@ -63,14 +63,14 @@ class PaymentService {
     return selectedAddresses;
   }
 
-  Future<UserOperation> signUserOperations(
-      BigInt amountToSend, String address, Uint8List ephPubKey) async {
+  Future<UserOperation> signUserOperations(BigInt amountToSend,
+      String toAddress, Uint8List ephPubKey, String mineAddress) async {
     final approveCallData = encodeErc20ApproveFunctionCall(
       address: Constants.erc5564Announcer,
       amount: amountToSend,
     );
     final sendCallData = encodeSendTokenFunctionCall(
-      to: EthereumAddress.fromHex(address),
+      to: EthereumAddress.fromHex(toAddress),
       tokenAddress: Constants.usdc,
       amount: amountToSend,
       pk: bytesToHex(ephPubKey),
@@ -87,7 +87,7 @@ class PaymentService {
           [approveCallData, sendCallData],
         ]);
 
-    final nonce = await getNonce();
+    final nonce = await getNonce(EthereumAddress.fromHex(mineAddress));
 
     String? initCode;
 
@@ -139,7 +139,12 @@ class PaymentService {
 
     List<UserOperation> ops = [];
     for (var utxo in selectedUtxos) {
-      final op = await signUserOperations(utxo.balance, toAddress, ephPubKey);
+      final op = await signUserOperations(
+        utxo.balance,
+        toAddress,
+        ephPubKey,
+        utxo.address,
+      );
       ops.add(op);
     }
     return ops;
@@ -174,14 +179,14 @@ class PaymentService {
     return "0x${ss.join('')}";
   }
 
-  Future<BigInt> getNonce() async {
+  Future<BigInt> getNonce(EthereumAddress address) async {
     final client = getWeb3Client();
 
     final nonce = await client.call(
         contract: entryPointContract,
         function: entryPointContract.getNonce,
         params: [
-          Constants.simpleAccount,
+          address,
           BigInt.zero,
         ]);
     return nonce.first;
