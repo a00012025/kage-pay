@@ -44,6 +44,8 @@ dependencies:
   pointycastle: ^3.7.4
   variance_dart: ^0.0.9
   pretty_qr_code: ^3.3.0
+  http: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

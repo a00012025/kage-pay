@@ -1,13 +1,12 @@
 // ignore_for_file: avoid_print
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:web3dart/crypto.dart';
-import 'package:web3dart/web3dart.dart';
-import 'dart:math';
 
 void main() {
   test('Stealth address', () async {
