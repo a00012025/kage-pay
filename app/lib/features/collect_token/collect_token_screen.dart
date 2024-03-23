@@ -5,12 +5,11 @@ import 'dart:typed_data';
 import 'package:app/features/common/contract/erc20_contract.dart';
 import 'package:app/features/common/contract/message_transmitter.dart';
 import 'package:app/features/common/contract/token_messenger_contract.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:http/http.dart' as http;
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -83,47 +82,48 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          // display usdcMumbaiBalance
-          const Text(
-            'USDC Balance in Mumbai',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/icons/polygon.jpg', width: 20),
+                    Gaps.w4,
+                    const Text(
+                      'Polygon Mumbai',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${usdcMumbaiBalance.toString()} usdc',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          Text(
-            usdcMumbaiBalance.toString(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Gaps.h12,
-          // display usdcOpSepoliaBalance
-          const Text(
-            'USDC Balance in Op Sepolia',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            usdcOpSepoliaBalance.toString(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Gaps.h12,
-          const Center(
-            child: Text(
-              'Transfer USDC from Mumbai to Op Sepolia',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+
           Gaps.h12,
           !isLoading
               ? DefaultButton(
@@ -140,44 +140,87 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Image.asset(
-                      'assets/icons/send.png',
+                      'assets/icons/collect.png',
                       width: 32,
                     ),
                   ),
                 )
               : const CircularProgressIndicator(),
           Gaps.h12,
-          const Center(
-            child: Text(
-              'Transfer USDC from Op Sepolia to Mumbai',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/icons/op.jpg', width: 20),
+                    Gaps.w4,
+                    const Text(
+                      'Op Sepolia',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${usdcOpSepoliaBalance.toString()} usdc',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          Gaps.h12,
-          !isLoading
-              ? DefaultButton(
-                  onPressed: () {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    Future.delayed(const Duration(seconds: 5), () {
-                      setState(() {
-                        isLoading = false;
-                      });
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Image.asset(
-                      'assets/icons/send.png',
-                      width: 32,
-                    ),
-                  ),
-                )
-              : const CircularProgressIndicator(),
+
+          // Gaps.h12,
+          // const Center(
+          //   child: Text(
+          //     'Transfer USDC from Op Sepolia to Mumbai',
+          //     style: TextStyle(
+          //       fontSize: 18,
+          //       fontWeight: FontWeight.bold,
+          //     ),
+          //   ),
+          // ),
+          // Gaps.h12,
+          // !isLoading
+          //     ? DefaultButton(
+          //         onPressed: () {
+          //           setState(() {
+          //             isLoading = true;
+          //           });
+          //           Future.delayed(const Duration(seconds: 5), () {
+          //             setState(() {
+          //               isLoading = false;
+          //             });
+          //           });
+          //         },
+          //         child: Padding(
+          //           padding: const EdgeInsets.all(12.0),
+          //           child: Image.asset(
+          //             'assets/icons/send.png',
+          //             width: 32,
+          //           ),
+          //         ),
+          //       )
+          //     : const CircularProgressIndicator(),
         ],
       ),
     );
@@ -187,7 +230,7 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
 Future<void> mumbaiUsdcToOpSepolia() async {
   final nonce = await mumbaiWeb3Client.getTransactionCount(
     EthereumAddress.fromHex(address),
-    atBlock: BlockNum.pending(),
+    atBlock: const BlockNum.pending(),
   );
   var txHash = await mumbaiWeb3Client.sendTransaction(
     EthPrivateKey.fromHex(privateKey),

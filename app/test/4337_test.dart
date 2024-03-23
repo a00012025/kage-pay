@@ -12,7 +12,7 @@ void main() {
       contract: abContract,
       function: abContract.getAddress,
       params: [
-        Constants.myAddress,
+        Constants.relaterAddress,
         Constants.usdc,
         Constants.payMaster,
         BigInt.zero,

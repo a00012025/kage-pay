@@ -77,7 +77,7 @@ class PaymentService {
     );
 
     final callData = encodeExecuteBatchFunctionCall(
-        address: Constants.simpleAccount,
+        address: EthereumAddress.fromHex(mineAddress),
         params: [
           [
             Constants.usdc,
@@ -87,14 +87,17 @@ class PaymentService {
           [approveCallData, sendCallData],
         ]);
 
+    final seed = StealthPrivateKey.getSeedFromAddress(mineAddress);
+    final privateKey = StealthPrivateKey.aliceStealthPrivateKey(seed);
+
     final nonce = await getNonce(EthereumAddress.fromHex(mineAddress));
-
+    debugPrint('=======nonce : $nonce=========');
     String? initCode;
-
+//"0xa0371bd6aeccfee005b49709738e49abce65561d"
     if (nonce == BigInt.zero) {
       final createAccountCallData =
           simpleAccountFactoryContract.function('createAccount').encodeCall([
-        EthereumAddress.fromHex(mineAddress),
+        privateKey.address,
         Constants.usdc,
         Constants.payMaster,
         BigInt.zero,
@@ -117,7 +120,7 @@ class PaymentService {
     final chain = Chains.getChain(Network.sepolia);
     log("op.hash(chain): ${bytesToHex(op.hash(chain), include0x: true)}");
     final signature = EthSigUtil.signPersonalMessage(
-      privateKey: tempPrivateKey,
+      privateKey: bytesToHex(privateKey.privateKey),
       message: op.hash(chain),
     );
 
@@ -162,12 +165,12 @@ class PaymentService {
       function: entryPointContract.handleOps,
       parameters: [
         ops.map((e) => e.toList()).toList(),
-        Constants.myAddress,
+        Constants.relaterAddress,
       ],
       maxGas: 1000000,
     );
-    final hash =
-        await client.sendTransaction(cred, transaction, chainId: 11155111);
+    final hash = await client.sendTransaction(cred, transaction,
+        chainId: Chains.getChain(Network.sepolia).chainId);
     return hash;
   }
 
