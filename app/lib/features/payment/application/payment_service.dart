@@ -127,7 +127,7 @@ class PaymentService {
   }
 
   Future<List<UserOperation>> getUserOperations(
-      String amountToSend, Uint8List ephPubKey) async {
+      String amountToSend, Uint8List ephPubKey, String toAddress) async {
     final allUtxos = await StealthPrivateKey.getAllUtxo();
     final amount = (double.tryParse(amountToSend) ?? 0.0) * 1000000;
     final rawAmount = BigInt.from(amount);
@@ -139,16 +139,15 @@ class PaymentService {
 
     List<UserOperation> ops = [];
     for (var utxo in selectedUtxos) {
-      final op =
-          await signUserOperations(utxo.balance, utxo.address, ephPubKey);
+      final op = await signUserOperations(utxo.balance, toAddress, ephPubKey);
       ops.add(op);
     }
     return ops;
   }
 
   Future<String> sendUserOperation(
-      String sendAmount, String address, Uint8List ephPubKey) async {
-    final ops = await getUserOperations(sendAmount, ephPubKey);
+      String sendAmount, String toAddress, Uint8List ephPubKey) async {
+    final ops = await getUserOperations(sendAmount, ephPubKey, toAddress);
     final client = getWeb3Client();
 
     final cred = EthPrivateKey.fromHex(tempPrivateKey);
