@@ -15,8 +15,8 @@ class UserUtxoAddress extends _$UserUtxoAddress {
 
   @override
   FutureOr<List<UtxoAddress>> build() {
-    updateState();
-    return [];
+    state = const AsyncLoading();
+    return StealthPrivateKey.getAllUtxo();
   }
 }
 

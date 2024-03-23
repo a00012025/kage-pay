@@ -1,5 +1,6 @@
 import 'package:app/features/home/controllers/user_addresses_controller.dart';
 import 'package:app/features/home/controllers/user_controller.dart';
+import 'package:app/features/home/domain/jumping_dot.dart';
 import 'package:app/features/home/domain/userdata.dart';
 import 'package:app/features/payment/domain/utxo_address.dart';
 import 'package:app/features/send_token/scan_address_screen.dart';
@@ -78,30 +79,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   background: Column(
                     children: [
                       Gaps.h32,
-                      userUtxoAddress.when(
-                        data: (value) {
-                          return TotalBalanceWidget(
-                            userData: userData,
-                            totalBalance: getBalance(value),
-                          );
-                        },
-                        loading: () => const CircularProgressIndicator(),
-                        error: (error, _) => Text('Error: $error'),
+                      TotalBalanceWidget(
+                        userData: userData,
                       ),
-                      Gaps.h32,
-                      // AppTap(
-                      //   onTap: () {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(
-                      //         builder: (context) => const SendTokenScreen(
-                      //             "dora",
-                      //             "0x0a7a51B8887ca23B13d692eC8Cb1CCa4100eda4B"),
-                      //       ),
-                      //     );
-                      //   },
-                      //   child: const Text("test"),
-                      // ),
                       SendReceieveBtn(
                         name: userData.name,
                       ),
@@ -196,7 +176,7 @@ class TxHistoryItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Receieved",
+                    "Received",
                     style: TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.bold,
@@ -386,18 +366,18 @@ class QrcodeCard extends StatelessWidget {
   }
 }
 
-class TotalBalanceWidget extends StatelessWidget {
+class TotalBalanceWidget extends ConsumerWidget {
   const TotalBalanceWidget({
     super.key,
     required this.userData,
-    required this.totalBalance,
   });
 
   final UserData userData;
-  final String totalBalance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userUtxoAddress = ref.watch(userUtxoAddressProvider);
+
     return Column(
       children: [
         Text(
@@ -417,33 +397,48 @@ class TotalBalanceWidget extends StatelessWidget {
             Gaps.w8,
 
             //richText with decimal
-            RichText(
-              text: TextSpan(
-                text: totalBalance.split('.')[0],
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.black,
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                    ),
-                children: [
-                  TextSpan(
-                    text: totalBalance.split('.').length > 1
-                        ? '.${totalBalance.split('.')[1]}'
-                        : '.00',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            userUtxoAddress.when(
+              data: (value) {
+                final totalBalance = getBalance(value);
+                return RichText(
+                  text: TextSpan(
+                    text: totalBalance.split('.')[0],
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.black,
+                          fontSize: 48,
                           fontWeight: FontWeight.bold,
-                          fontSize: 28,
                         ),
+                    children: [
+                      TextSpan(
+                        text: totalBalance.split('.').length > 1
+                            ? '.${totalBalance.split('.')[1]}'
+                            : '.00',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 28,
+                            ),
+                      ),
+                      TextSpan(
+                        text: 'USDC',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                      ),
+                    ],
                   ),
-                  TextSpan(
-                    text: 'USDC',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                );
+              },
+              loading: () {
+                return const SizedBox(
+                  width: 32.0,
+                  height: 52.0,
+                  child: JumpingDotIndicator(
+                    duration: Duration(milliseconds: 300),
                   ),
-                ],
-              ),
+                );
+              },
+              error: (error, _) => Text('Error: $error'),
             ),
           ],
         ),
