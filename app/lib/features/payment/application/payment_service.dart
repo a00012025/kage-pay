@@ -94,7 +94,7 @@ class PaymentService {
     if (nonce == BigInt.zero) {
       final createAccountCallData =
           simpleAccountFactoryContract.function('createAccount').encodeCall([
-        Constants.myAddress,
+        EthereumAddress.fromHex(mineAddress),
         Constants.usdc,
         Constants.payMaster,
         BigInt.zero,
