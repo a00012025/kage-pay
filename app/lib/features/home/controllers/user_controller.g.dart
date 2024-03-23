@@ -7,7 +7,7 @@ part of 'user_controller.dart';
 // **************************************************************************
 
 String _$userDataControllerHash() =>
-    r'8000483375546b6df534e617ef6edd3ba5d35970';
+    r'b843876e34d53871d09065459d182af9f56e280f';
 
 /// See also [UserDataController].
 @ProviderFor(UserDataController)

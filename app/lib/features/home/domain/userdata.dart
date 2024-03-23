@@ -7,6 +7,7 @@ part 'userdata.g.dart';
 class UserData with _$UserData {
   factory UserData({
     required String name,
+    @Default("0") String totalBalance,
   }) = _UserData;
 
   factory UserData.fromJson(Map<String, dynamic> json) =>
