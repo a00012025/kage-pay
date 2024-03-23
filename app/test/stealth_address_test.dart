@@ -74,6 +74,14 @@ void main() {
     print("bobSharedSecret: ${bytesToHex(intToBytes(bobSharedSecret))}");
     final stealthPrivateKey = bob.k + bobSharedSecret;
     print("stealthPrivateKey: 0x${bytesToHex(intToBytes(stealthPrivateKey))}");
+    final stPubKey = privateKeyToPublic(stealthPrivateKey);
+
+    final Gx = params.G.x!.toBigInteger()!;
+    final Gy = params.G.y!.toBigInteger()!;
+    print("Gx: ${bytesToHex(intToBytes(Gx))}");
+    print("Gy: ${bytesToHex(intToBytes(Gy))}");
+
+    print("stealthPublicKey: ${bytesToHex(stPubKey)}");
     final bobRecoveredAddress =
         publicKeyToAddress(privateKeyToPublic(stealthPrivateKey));
     print('bobRecoveredAddress: 0x${bytesToHex(bobRecoveredAddress)}');
