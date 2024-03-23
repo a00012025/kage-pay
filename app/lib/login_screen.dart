@@ -48,6 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const Spacer(),
               DefaultButton(
+                  showIcon: true,
                   isDisable: textEditingController.text.isEmpty,
                   onPressed: () {
                     if (textEditingController.text.isEmpty) {

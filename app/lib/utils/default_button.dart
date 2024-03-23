@@ -10,7 +10,7 @@ class DefaultButton extends StatelessWidget {
     this.textStyle,
     super.key,
     this.isDisable = false,
-    this.showIcon = true,
+    this.showIcon = false,
     this.child,
   });
   final VoidCallback onPressed;
@@ -57,7 +57,13 @@ class DefaultButton extends StatelessWidget {
                 child: Image.asset(
                   'assets/icons/ninja_white.png',
                   width: 24,
-                ),
+                )
+                    .animate(
+                        onPlay: (controller) =>
+                            controller.repeat(reverse: true))
+                    .flipH(
+                      duration: const Duration(milliseconds: 300),
+                    ),
               ),
             ),
         ],
