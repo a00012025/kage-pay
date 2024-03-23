@@ -1,0 +1,63 @@
+.logo {
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  margin-top: -26px;
+  margin-left: -26px;
+  z-index: 300;
+}
+
+#organic-blob circle {
+  fill: #2c3135;
+}
+
+@keyframes from0to360 {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#Circle1 {
+  animation: from0to360 2s linear infinite;
+  cx: 150;
+  cy: 145;
+  r: 100;
+  transform-origin: 145px 150px;
+}
+
+@keyframes from360to0 {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+#Circle2 {
+  animation: from360to0 3s linear infinite;
+  cx: 150;
+  cy: 155;
+  r: 100;
+  transform-origin: 155px 150px;
+}
+
+#Circle3 {
+  animation: from0to360 4s linear infinite;
+  cx: 145;
+  cy: 150;
+  r: 100;
+  transform-origin: 150px 145px;
+}
+
+#Circle4 {
+  animation: from360to0 2.5s linear infinite;
+  cx: 155;
+  cy: 150;
+  r: 100;
+  transform-origin: 150px 155px;
+}
