@@ -270,8 +270,8 @@ Future<void> mumbaiUsdcToOpSepolia() async {
       contract: opSepoliaMessageTransmitter,
       function: opSepoliaMessageTransmitter.receiveMessage,
       parameters: [
-        bytesToHex(messageBytes, include0x: true),
-        attestation,
+        messageBytes,
+        hexToBytes(attestation),
       ],
     ),
     chainId: 11155420,
