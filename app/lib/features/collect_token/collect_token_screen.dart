@@ -7,6 +7,7 @@ import 'package:app/features/common/contract/message_transmitter.dart';
 import 'package:app/features/common/contract/token_messenger_contract.dart';
 import 'package:app/utils/default_button.dart';
 import 'package:app/utils/gaps.dart';
+import 'package:app/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,6 +75,7 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
       usdcMumbaiBalance = balance1[0] / BigInt.from(10).pow(6);
       usdcOpSepoliaBalance = balance2[0] / BigInt.from(10).pow(6);
       isLoading = false;
+      customToast("Collect Success");
     });
   }
 
@@ -127,33 +129,50 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
 
           Gaps.h12,
           !isLoading
-              ? Column(
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    DefaultButton(
-                      onPressed: () {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        mumbaiUsdcToOpSepolia().then((_) async {
-                          await refreshBalance();
-                        }).catchError((error) {
-                          log(error.toString());
-                        });
-                      },
-                      child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Image.asset(
-                            'assets/icons/collect.png',
-                            width: 32,
-                          )),
+                    const Flexible(
+                      child: SizedBox(
+                        width: 150,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter amount',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Gaps.w8,
+                    Column(
                       children: [
-                        Icon(Icons.swap_vert_outlined),
-                        Text("Collect"),
+                        DefaultButton(
+                          onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            mumbaiUsdcToOpSepolia().then((_) async {
+                              await refreshBalance();
+                            }).catchError((error) {
+                              log(error.toString());
+                            });
+                          },
+                          child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Image.asset(
+                                'assets/icons/collect.png',
+                                width: 32,
+                              )),
+                        ),
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.swap_vert_outlined),
+                            Text("Collect"),
+                          ],
+                        )
                       ],
-                    )
+                    ),
                   ],
                 )
               : Column(
