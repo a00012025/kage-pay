@@ -255,7 +255,7 @@ export default function Home() {
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ListCard address={address} amount={balance[index].toFixed(4)} />
+              <ListCard address={address} amount={balance[index]?.toFixed(4) ?? '0'} />
             </motion.div>
           ))}
         </AnimatePresence>
