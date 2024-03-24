@@ -47,6 +47,8 @@ final opSepoliaMessageTransmitter = MessageTransmitterContract(
     EthereumAddress.fromHex("0x7865fAfC2db2093669d92c0F33AeEF291086BEFD"));
 
 class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
+  final textEditingController = TextEditingController();
+
   // loading state
   var isLoading = true;
   var usdcMumbaiBalance = 0.0;
@@ -132,11 +134,12 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Flexible(
+                    Flexible(
                       child: SizedBox(
                         width: 150,
                         child: TextField(
-                          decoration: InputDecoration(
+                          controller: textEditingController,
+                          decoration: const InputDecoration(
                             hintText: 'Enter amount',
                           ),
                           textAlign: TextAlign.center,
@@ -151,7 +154,8 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                             setState(() {
                               isLoading = true;
                             });
-                            mumbaiUsdcToOpSepolia().then((_) async {
+                            mumbaiUsdcToOpSepolia(textEditingController.text)
+                                .then((_) async {
                               await refreshBalance();
                             }).catchError((error) {
                               log(error.toString());
@@ -284,11 +288,15 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
   }
 }
 
-Future<void> mumbaiUsdcToOpSepolia() async {
+Future<void> mumbaiUsdcToOpSepolia(String amountStr) async {
+  final amount = (double.tryParse(amountStr) ?? 0.0) * 100000;
+  final rawAmount = BigInt.from(amount);
+
   final nonce = await mumbaiWeb3Client.getTransactionCount(
     EthereumAddress.fromHex(address),
     atBlock: const BlockNum.pending(),
   );
+
   var txHash = await mumbaiWeb3Client.sendTransaction(
     EthPrivateKey.fromHex(privateKey),
     Transaction.callContract(
@@ -296,7 +304,7 @@ Future<void> mumbaiUsdcToOpSepolia() async {
       function: mumbaiUsdc.approve,
       parameters: [
         EthereumAddress.fromHex("0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5"),
-        BigInt.from(10).pow(4), // 0.01 USDC
+        rawAmount,
       ],
       nonce: nonce,
     ),
@@ -316,7 +324,7 @@ Future<void> mumbaiUsdcToOpSepolia() async {
       contract: mumbaiTokenMessenger,
       function: mumbaiTokenMessenger.depositForBurn,
       parameters: [
-        BigInt.from(10).pow(4), // 0.01 USDC
+        rawAmount,
         BigInt.from(2), // OP
         hexToBytes('0x000000000000000000000000${address.substring(2)}'),
         EthereumAddress.fromHex(mumbaiUsdcAddress),
