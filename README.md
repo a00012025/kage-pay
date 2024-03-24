@@ -8,6 +8,10 @@ Kage-Pay offers a secure and user-friendly blockchain payment solution for face-
 
 ![f1](./img/f1.png)
 ![f2](./img/f2.png)
+![app_1](./img/app_1.png)
+![app_2](./img/app_2.png)
+![app_3](./img/app_3.png)
+![app_4](./img/app_4.png)
 
 ## Contracts
 
