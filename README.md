@@ -10,8 +10,9 @@ Kage-Pay offers a secure and user-friendly blockchain payment solution for face-
 ![f2](./img/f2.png)
 ![app_1](./img/app_1.png)
 ![app_2](./img/app_2.png)
-![app_3](./img/app_3.png)
-![app_4](./img/app_4.png)
+![app_3](./img/app_3.gif)
+![app_4](./img/app_4.gif)
+![app_5](./img/app_5.png)
 
 ## Contracts
 
@@ -62,7 +63,7 @@ Examples:
 
 ### Setup Paymaster
 
-1. Set up `*_PAYMASTER_CONTRACT_ADDRESS` and run `./script/paymaster-setup.sh {chain_name}`
+1. Set up `{chain_name}_PAYMASTER_CONTRACT_ADDRESS` and run `./script/paymaster-setup.sh {chain_name}`
 
 Or, manually:
 

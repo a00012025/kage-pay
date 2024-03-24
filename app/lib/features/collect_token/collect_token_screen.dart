@@ -138,6 +138,10 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                       child: SizedBox(
                         width: 150,
                         child: TextField(
+                          keyboardType: const TextInputType.numberWithOptions(
+                            signed: false,
+                            decimal: true,
+                          ),
                           controller: textEditingController,
                           decoration: const InputDecoration(
                             hintText: 'Enter amount',
@@ -289,7 +293,7 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
 }
 
 Future<void> mumbaiUsdcToOpSepolia(String amountStr) async {
-  final amount = (double.tryParse(amountStr) ?? 0.0) * 100000;
+  final amount = (double.tryParse(amountStr) ?? 0.0) * 1000000;
   final rawAmount = BigInt.from(amount);
 
   final nonce = await mumbaiWeb3Client.getTransactionCount(
