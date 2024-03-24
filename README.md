@@ -65,7 +65,7 @@ Examples:
 
 ### Setup Paymaster
 
-1. Set up `*_PAYMASTER_CONTRACT_ADDRESS` and run `./script/paymaster-setup.sh {chain_name}`
+1. Set up `{chain_name}_PAYMASTER_CONTRACT_ADDRESS` and run `./script/paymaster-setup.sh {chain_name}`
 
 Or, manually:
 
