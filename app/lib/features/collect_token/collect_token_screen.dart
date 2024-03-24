@@ -138,6 +138,10 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
                       child: SizedBox(
                         width: 150,
                         child: TextField(
+                          keyboardType: const TextInputType.numberWithOptions(
+                            signed: false,
+                            decimal: true,
+                          ),
                           controller: textEditingController,
                           decoration: const InputDecoration(
                             hintText: 'Enter amount',
