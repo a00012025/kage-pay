@@ -46,10 +46,14 @@ const OrganicCircle = ({ amount, token, className }: OrganicCircleProps) => {
           dominantBaseline="middle"
           fill="white"
           fontSize="30"
+          letterSpacing="2"
           className={cn(spaceGrotesk.className, "font-bold")}
         >
           <tspan x="50%" y="45%">
-            {amount}
+            <tspan fontSize="1.3em">{amount.split(".")[0]}</tspan>
+            <tspan fontSize="0.7em" dy="0.2em">
+              .{amount.includes(".") && amount.split(".")[1]}
+            </tspan>
           </tspan>
           <tspan x="50%" y="58%">
             {token}
