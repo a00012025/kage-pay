@@ -289,7 +289,7 @@ class _CollectTokenState extends ConsumerState<CollectTokenScreen> {
 }
 
 Future<void> mumbaiUsdcToOpSepolia(String amountStr) async {
-  final amount = (double.tryParse(amountStr) ?? 0.0) * 100000;
+  final amount = (double.tryParse(amountStr) ?? 0.0) * 1000000;
   final rawAmount = BigInt.from(amount);
 
   final nonce = await mumbaiWeb3Client.getTransactionCount(
