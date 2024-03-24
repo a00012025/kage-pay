@@ -15,7 +15,8 @@ contract DeployPaymasterScript is Script {
         ArbSepolia,
         PolygonMumbai,
         ScrollSepolia,
-        Zircuit
+        Zircuit,
+        Linea
     }
 
     // Define configuration struct
@@ -39,6 +40,7 @@ contract DeployPaymasterScript is Script {
         chainIDs[ChainEnum.PolygonMumbai] = 80001;
         chainIDs[ChainEnum.ScrollSepolia] = 534351;
         chainIDs[ChainEnum.Zircuit] = 48899;
+        chainIDs[ChainEnum.Linea] = 59140;
 
         // Initialize configurations for each chain
         chainConfigs[chainIDs[ChainEnum.Sepolia]] = ChainConfig({
@@ -68,6 +70,11 @@ contract DeployPaymasterScript is Script {
         });
         chainConfigs[chainIDs[ChainEnum.Zircuit]] = ChainConfig({
             tokenOracleAddress: address(0x0),
+            tokenAddress: 0x586b31774d15ee066c95D22A72A5De71eAA95125,
+            nativeOracleAddress: address(0x0)
+        });
+        chainConfigs[chainIDs[ChainEnum.Linea]] = ChainConfig({
+            tokenOracleAddress: 0xcCFF6C2e770Faf4Ff90A7760E00007fd32Ff9A97,
             tokenAddress: 0x586b31774d15ee066c95D22A72A5De71eAA95125,
             nativeOracleAddress: address(0x0)
         });
@@ -102,11 +109,12 @@ contract DeployPaymasterScript is Script {
         // If chain is zircuit, use TokenPaymasterNoOracle
         if (chainId == chainIDs[ChainEnum.Zircuit]) {
             TokenPaymasterNoOracle.TokenPaymasterConfig
-                memory tokenPaymasterConfig = TokenPaymasterNoOracle.TokenPaymasterConfig({
-                    priceMarkup: 1e26,
-                    refundPostopCost: 50000,
-                    priceMaxAge: 2000000
-                });
+                memory tokenPaymasterConfig = TokenPaymasterNoOracle
+                    .TokenPaymasterConfig({
+                        priceMarkup: 1e26,
+                        refundPostopCost: 50000,
+                        priceMaxAge: 2000000
+                    });
 
             TokenPaymasterNoOracle paymaster = new TokenPaymasterNoOracle(
                 token,
@@ -122,14 +130,15 @@ contract DeployPaymasterScript is Script {
             vm.stopBroadcast();
         } else {
             TokenPaymaster.TokenPaymasterConfig
-                memory tokenPaymasterConfig = TokenPaymaster.TokenPaymasterConfig({
-                    priceMarkup: 1e26,
-                    refundPostopCost: 50000,
-                    priceMaxAge: 2000000
-                });
+                memory tokenPaymasterConfig = TokenPaymaster
+                    .TokenPaymasterConfig({
+                        priceMarkup: 1e26,
+                        refundPostopCost: 50000,
+                        priceMaxAge: 2000000
+                    });
 
-            OracleHelper.OracleHelperConfig memory oracleHelperConfig = OracleHelper
-                .OracleHelperConfig({
+            OracleHelper.OracleHelperConfig
+                memory oracleHelperConfig = OracleHelper.OracleHelperConfig({
                     cacheTimeToLive: 86400,
                     maxOracleRoundAge: 2000000,
                     tokenOracle: IOracle(config.tokenOracleAddress), // Cast the address to IOracle

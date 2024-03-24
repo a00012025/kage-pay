@@ -11,6 +11,7 @@ declare -A chain_map=(
   ["scroll-sepolia"]="SCROLL_SEPOLIA"
   ["zircuit"]="ZIRCUIT"
   ["eth-sepolia"]="ETH_SEPOLIA"
+  ["linea"]="LINEA_GOERLI"
 )
 
 # Supported contracts and their deployment scripts
