@@ -20,23 +20,29 @@ import { keccak256 } from "viem";
 import * as secp from "@noble/secp256k1";
 
 export default function Home() {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
+  // const params = {
+  //   pk:
+  //     searchParams.get("pk") ??
+  //     "0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978",
+  //   pv:
+  //     searchParams.get("pv") ??
+  //     "0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7",
+  //   v:
+  //     searchParams.get("v") ??
+  //     "0x4b380bf4e5db9bb09053affcf64d5ba145281f6ab051ac569392ae38d8adf0ed",
+  //   name: searchParams.get("name") ?? "arron",
+  // };
   const params = {
-    pk:
-      searchParams.get("pk") ??
-      "0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978",
-    pv:
-      searchParams.get("pv") ??
-      "0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7",
-    v:
-      searchParams.get("v") ??
-      "0x4b380bf4e5db9bb09053affcf64d5ba145281f6ab051ac569392ae38d8adf0ed",
-    name: searchParams.get("name") ?? "arron",
+    pk: "0xe4fa494ae6778a7f92a5f88b8c594699c7dee9e8a7bf105c68a9be48fd5ffa3736441828fb7a5a76f360341183197aa94e6aa7bcab44c7169dee9444142bb978",
+    pv: "0xeb3e0a595b8ca73c46a4d083604f2023705d567757b543b9d3c189ad266905bd1db06b9166152bec3d2fd95a102e674e571d02bc0a66a886ede372c37ace82d7",
+    v: "0x4b380bf4e5db9bb09053affcf64d5ba145281f6ab051ac569392ae38d8adf0ed",
+    name: "arron",
   };
   const logContainerRef = useRef<HTMLDivElement>(null);
   const flag = useRef(false);
   const [addresses, setAddresses] = useState<string[]>([]);
-  const [balace, setBalace] = useState<string[]>([]);
+  const [balance, setBalance] = useState<number[]>([]);
   const [triggerPulse, setTriggerPulse] = useState(false);
 
   const getOwnerAddress = (eph: string) => {
@@ -141,7 +147,10 @@ export default function Home() {
 
     const addressArr = new Set<string>();
     logs.forEach((log) => {
-      if (stealthAddresses.includes(log.args.stealthAddress)) {
+      if (
+        log.args.stealthAddress &&
+        stealthAddresses.includes(log.args.stealthAddress)
+      ) {
         addressArr.add(log.args.stealthAddress);
       }
     });
@@ -149,7 +158,7 @@ export default function Home() {
 
     Promise.all([...addressArr].map((address) => getBalance(address))).then(
       (balanceArr) => {
-        setBalace(balanceArr);
+        setBalance(balanceArr);
       }
     );
   };
@@ -160,14 +169,15 @@ export default function Home() {
     eventName: "Announcement",
     onLogs(logs) {
       console.log("New logs!", logs);
+      if (!logs[0].args.stealthAddress) return;
       const index = addresses.indexOf(logs[0].args.stealthAddress);
       if (index !== -1) {
         getBalance(logs[0].args.stealthAddress)
-          .then((balance) => {
-            setBalace([
-              ...balace.slice(0, index),
-              balance,
-              ...balace.slice(index + 1),
+          .then((currentBalance) => {
+            setBalance([
+              ...balance.slice(0, index),
+              currentBalance,
+              ...balance.slice(index + 1),
             ]);
           })
           .catch((error) => console.log(error));
@@ -196,7 +206,7 @@ export default function Home() {
     <main className="min-h-screen px-4">
       <div className="flex flex-col justify-center w-full mb-4">
         <OrganicCircle
-          amount={balace.reduce((acc, curr) => acc + curr, 0).toFixed(3)}
+          amount={balance.reduce((acc, curr) => acc + curr, 0).toFixed(3)}
           token="USDC"
           className={cn({ "animate-pulse": triggerPulse })}
         />
@@ -245,7 +255,7 @@ export default function Home() {
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ListCard address={address} amount={balace[index]} />
+              <ListCard address={address} amount={balance[index].toFixed(4)} />
             </motion.div>
           ))}
         </AnimatePresence>
