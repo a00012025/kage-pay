@@ -1,5 +1,14 @@
 # kage-pay
 
+![kage](./img/kage.png)
+
+Kage-Pay offers a secure and user-friendly blockchain payment solution for face-to-face transactions, featuring gasless transactions through stablecoin-based fees, and cross-chain functionality by Circle CCTP to simplify managing assets across different blockchains. It employs stealth address technology for privacy and utilizes smartphones for secure transaction management, aiming to enhance blockchain usability and adoption.
+
+## Screenshots
+
+![f1](./img/f1.png)
+![f2](./img/f2.png)
+
 ## Contracts
 
 ### Current Contract Addresses
