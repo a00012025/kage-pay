@@ -43,7 +43,8 @@ class Chains {
     Network.sepolia: Chain(
         chainId: 11155111,
         explorer: "https://sepolia.etherscan.io/",
-        ethRpcUrl: "https://rpc.sepolia.org",
+        ethRpcUrl:
+            "https://eth-sepolia.g.alchemy.com/v2/DgoQgIklXGSGCY5-7rekG4CiV6nKO-A6",
         entrypoint: Constants.entrypoint,
         accountFactory: Constants.simpleAccountFactory),
   };
